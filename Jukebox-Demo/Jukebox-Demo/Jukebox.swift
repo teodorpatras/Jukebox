@@ -1,10 +1,25 @@
 //
-//  Jukebox.swift
-//  Jukebox-Demo
+// Jukebox.swift
 //
-//  Created by Teodor Patras on 27/08/15.
-//  Copyright (c) 2015 Teodor Patras. All rights reserved.
+// Copyright (c) 2015 Teodor Patraş
 //
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 import Foundation
 import AVFoundation
@@ -40,23 +55,23 @@ public enum JukeboxState : Int, Printable {
 public protocol JukeboxDelegate {
     func jukeboxStateDidChange(jukebox : Jukebox)
     func jukeboxPlaybackProgressDidChange(jukebox : Jukebox)
-    func jukeboxDidFinishAppendingItem(jukebox : Jukebox, item : JukeboxItem)
+    func jukeboxDidLoadItem(jukebox : Jukebox, item : JukeboxItem)
 }
 
 /// Because KVO does not work on pure Swift objects, Jukebox inherits from NSObject
-public class Jukebox : NSObject {
+public class Jukebox : NSObject, JukeboxItemDelegate {
     
     // MARK:- Properties -
-    private var player          :   AVQueuePlayer?
-    private var progressTimer   :   NSTimer?
-    private var playIndex       :   Int         = -1
-    private var queuedItems                     = [JukeboxItem]()
-    
-    public var delegate         :   JukeboxDelegate?
-    public var currentItem      :   JukeboxItem?
-    public var state            :   JukeboxState = .Ready
-    public var volume           :   Float
-    {
+    private var player              :   AVPlayer?
+    private var progressObserver    :   AnyObject!
+    private var playIndex           :   Int         = -1
+    private var queuedItems                         = [JukeboxItem]()
+
+    public var delegate             :   JukeboxDelegate?
+    public var currentItem          :   JukeboxItem?
+    public var state                :   JukeboxState = .Ready
+    public var volume               :   Float
+        {
         get {
             return self.player?.volume ?? 0
         }
@@ -67,98 +82,167 @@ public class Jukebox : NSObject {
     
     // MARK:- Initializer -
     
+    /**
+    Create an instance with a delegate and an empty play queue
+    
+    :param: delegate jukebox delegate
+    
+    :returns: Jukebox instance
+    */
     public convenience init(delegate : JukeboxDelegate?) {
-        self.init(delegate: delegate, itemURLs: [])
+        self.init(delegate: delegate, items: [])
     }
     
-    public required init (delegate : JukeboxDelegate?, itemURLs : [NSURL]) {
+    /**
+    Create an instance with a delegate and a list of items without loading their assets.
+    
+    :param: delegate jukebox delegate
+    :param: items    array of items to be added to the play queue
+    
+    :returns: Jukebox instance
+    */
+    public required init (delegate : JukeboxDelegate?, items : [JukeboxItem]) {
         self.delegate = delegate
         super.init()
+        
+        self.configureObservers()
         
         // prepare the audio session
         AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
         AVAudioSession.sharedInstance().setActive(true, error: nil)
         UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
         
-        // append items, if any
-        
-        if itemURLs.count > 0 {
-            self.state = .Loading
-            self.delegate?.jukeboxStateDidChange(self)
-        }
-        
-        for (index, url) in enumerate(itemURLs) {
-            self.loadAndAppendItem(JukeboxItem(url: url), completion:{item in
-                if index == 0 {
-                    // first
-                    self.currentItem = item
-                } else if (index == itemURLs.count - 1) {
-                    // last
-                    self.state = .Ready
-                    self.delegate?.jukeboxStateDidChange(self)
-                }
-            })
+        self.queuedItems = items
+        for item in self.queuedItems {
+            item.delegate = self
         }
     }
-    
     
     deinit{
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    // MARK:- KVO -
+    // MARK:- JukeboxItemDelegate -
     
-    public override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
-        if keyPath == "currentItem" {
-            if self.player?.currentItem != nil {
-                var old: AVPlayerItem? = change["old"] as? AVPlayerItem
-                var new: AVPlayerItem? = change["new"] as? AVPlayerItem
-                
-                if let new = change["new"] as? AVPlayerItem {
-                    for (index, jItem) in enumerate(self.queuedItems) {
-                        if jItem.playerItem == new {
-                            self.currentItem = jItem
-                            self.playIndex = index
-                            break
-                        }
-                    }
-                }
-            }
+    public func jukeboxItemDidLoadPlayerItem(item: JukeboxItem) {
+        println("Item loaded: \(item)")
+        self.delegate?.jukeboxDidLoadItem(self, item: item)
+        let index = find(self.queuedItems, item)
+        
+        if let playItem = item.playerItem
+            where self.state == .Loading && playIndex == index {
+                self.playItem(playItem)
+                NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerItemDidReachEnd:", name: AVPlayerItemDidPlayToEndTimeNotification, object: playItem)
         }
     }
     
     // MARK:- Public methods -
     
     /**
+    Removes an item from the play queue
+    
+    :param: item item to be removed
+    */
+    public func removeItem(item : JukeboxItem) {
+        self.removeItemWithURL(item.URL)
+    }
+    
+    /**
+    Removes an item from the play queue based on URL
+    
+    :param: url the item URL
+    */
+    public func removeItemWithURL(url : NSURL) {
+        var index = -1
+        
+        for (idx, item) in enumerate(queuedItems) {
+            if item.URL == url {
+                index = idx
+                break
+            }
+        }
+        
+        if index > -1 {
+            self.queuedItems.removeAtIndex(index)
+        }
+    }
+    
+    /**
+    Appends and optionally loads an item
+    
+    :param: item            the item to be appended to the play queue
+    :param: loadingAssets   flag indicating wether or not the item should load it's assets
+    */
+    public func appendItem(item : JukeboxItem, loadingAssets : Bool) {
+        self.checkItemAlreadyExists(item)
+        self.queuedItems.append(item)
+        item.delegate = self
+        if loadingAssets {
+            item.loadPlayerItem()
+        }
+    }
+    
+    /**
+    Plays the item indicated by the passed index
+    
+    :param: index index of the item to be played
+    */
+    public func playAtIndex(index : Int) {
+        if (index > self.queuedItems.count - 1) {
+            return
+        }
+        
+        if let item = self.queuedItems[index].playerItem where self.playIndex == index{
+            if self.state == .Paused {
+                // resume playing
+                self.state = .Playing
+                self.player?.play()
+                self.delegate?.jukeboxStateDidChange(self)
+            }
+            return
+        }
+        
+        self.playIndex = index
+        if let item = self.currentItem?.playerItem {
+            NSNotificationCenter.defaultCenter().removeObserver(self, name: AVPlayerItemDidPlayToEndTimeNotification, object: item)
+        }
+        self.currentItem = self.queuedItems[index]
+        
+        if let asset = self.queuedItems[index].playerItem?.asset {
+            
+            self.queuedItems[index].refreshPlayerItem(asset)
+            self.playItem(self.queuedItems[index].playerItem!)
+            /* Observe when the player item has played to its end time */
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerItemDidReachEnd:", name: AVPlayerItemDidPlayToEndTimeNotification, object: self.queuedItems[index].playerItem!)
+        } else {
+            self.stopProgressTimer()
+            self.player?.pause()
+            self.queuedItems[index].loadPlayerItem()
+            self.state = .Loading
+            self.delegate?.jukeboxStateDidChange(self)
+        }
+        
+        /**
+        *  preload next and previous
+        */
+        if index - 1 >= 0 {
+            self.queuedItems[index - 1].loadPlayerItem()
+        }
+        
+        if index + 1 < self.queuedItems.count {
+            self.queuedItems[index + 1].loadPlayerItem()
+        }
+    }
+    
+    /**
     Starts playing from the items queue in FIFO order. Call this method only if you previously added at least one item to the queue.
     */
     public func play() {
         
-        if (self.player == nil || self.currentItem == nil) {
+        if (self.playIndex < 0 || self.playIndex >= self.queuedItems.count) {
             return
         }
-        
-        self.player?.play()
-        self.state = .Playing
-        self.scheduleProgressTimer()
-        self.delegate?.jukeboxStateDidChange(self)
-    }
-    
-    /**
-    Configures the jukebox with one item to begin with and starts playing
-    
-    :param: item the first item to be played
-    */
-    public func playSingleItem(item : JukeboxItem) {
-        
-        self.currentItem = item
-        
-        self.loadAndAppendItem(item, completion: { _ in
-            self.play()
-        })
-        
-        self.state = .Loading
-        self.delegate?.jukeboxStateDidChange(self)
+        self.playAtIndex(self.playIndex)
     }
     
     /**
@@ -188,10 +272,9 @@ public class Jukebox : NSObject {
         self.player?.pause()
         self.player = nil
         self.currentItem = nil
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        self.playIndex = -1
         
         self.state = .Ready
-        
         self.delegate?.jukeboxStateDidChange(self)
     }
     
@@ -205,7 +288,7 @@ public class Jukebox : NSObject {
         }
         self.stopProgressTimer()
         self.seekToSecond(0)
-        self.play()
+        self.playAtIndex(0)
     }
     
     /**
@@ -216,9 +299,8 @@ public class Jukebox : NSObject {
             return
         }
         
-        if self.playIndex + 1 < self.queuedItems.count {
-            //self.playItemAtIndex(self.playIndex + 1)
-            self.player?.advanceToNextItem()
+        if self.playIndex >= 0 && playIndex + 1 < self.queuedItems.count {
+            self.playAtIndex(playIndex  + 1)
         }
     }
     
@@ -230,126 +312,82 @@ public class Jukebox : NSObject {
             return
         }
         
-        if self.queuedItems.count > 0{
-            
-            if let time = self.currentItem?.currentTime  {
-                if time <= 1 && self.playIndex - 1 >= 0 {
-                    self.playItemAtIndex(playIndex - 1)
-                } else  {
-                    self.seekToSecond(0)
-                }
-            }
+        if self.currentItem?.currentTime > 1 {
+            self.seekToSecond(0)
+        } else if playIndex - 1 >= 0 {
+            self.playAtIndex(playIndex - 1)
         }
     }
     
     /**
-    Seeks to a certain second within the current AVPlayerItem that is playing
+    Seeks to a certain second within the current AVPlayerItem and starts playing
     
     :param: second the second to be seek to
     */
     public func seekToSecond(second: Int) {
+        self.seekToSecond(second, shouldPlay: true)
+    }
+    
+    // MARK:- Private methods -
+    
+    private func playItem(item : AVPlayerItem) {
+        
+        // Get rid of old data
+        self.stopProgressTimer()
+        self.player?.pause()
+        self.player = nil
+        
+        // Configure player
+        self.player = AVPlayer(playerItem: item)
+        
+        // Configure time observer
+        self.startProgressTimer()
+        
+        // Play & Update state
+        player!.seekToTime(CMTimeMake(Int64(0), 1))
+        player!.play()
+        self.state = .Playing
+        self.delegate?.jukeboxStateDidChange(self)
+    }
+    
+    private func seekToSecond(second : Int, shouldPlay: Bool) {
         if (self.player == nil || self.currentItem == nil) {
             return
         }
         
         if let player = self.player, let item = self.currentItem {
             player.seekToTime(CMTimeMake(Int64(second), 1))
-            item.updateWithPlayerItem(player.currentItem)
+            item.update()
             self.delegate?.jukeboxPlaybackProgressDidChange(self)
-            player.play()
-        }
-    }
-    
-    /**
-    Appends a new item to the queue
-    
-    :param: item the item to be appended
-    */
-    public func enqueueItem(item : JukeboxItem) {
-        self.loadAndAppendItem(item, completion: nil)
-    }
-    
-    // MARK:- Progress tracking -
-    
-    private func scheduleProgressTimer(){
-        
-        var timerInterval : Double = 0.3
-        
-        if let rate = self.player?.rate {
-            timerInterval = 1 / Double(rate)
-        }
-        self.progressTimer = NSTimer.scheduledTimerWithTimeInterval(timerInterval, target: self, selector: "timerAction", userInfo: nil, repeats: true)
-    }
-    
-    private func stopProgressTimer() {
-        self.progressTimer?.invalidate()
-        self.progressTimer = nil
-    }
-    
-    // MARK:- Internal methods -
-    
-    func loadAndAppendItem(item : JukeboxItem, completion : ((item : JukeboxItem) -> ())?) {
-        let asset = AVURLAsset(URL: item.URL, options: nil)
-        
-        // duration, tracks
-        asset.loadValuesAsynchronouslyForKeys(["playable", "duration"], completionHandler: { () -> Void in
-                dispatch_async(dispatch_get_main_queue()) {
-                    
-                    if self.player == nil {
-                        self.player = AVQueuePlayer()
-                        self.player?.actionAtItemEnd = .Advance
-                        self.player?.addObserver(self, forKeyPath: "currentItem", options: .New | .Old, context: nil)
-                        self.configureObservers()
-                        
-                        self.playIndex = 0
-                        self.queuedItems = [JukeboxItem]()
-                    }
-                    
-                    self.appendItem(item, asset: asset)
-                    completion?(item: item)
-                }
-        })
-    }
-    
-    func appendItem(item : JukeboxItem, asset: AVAsset) {
-        
-        if let player = self.player {
-            
-            checkItemAlreadyExists(item)
-            
-            let playerItem = AVPlayerItem(asset: asset)
-            item.updateWithPlayerItem(playerItem)
-            
-            self.queuedItems.append(item)
-            
-            if player.canInsertItem(playerItem, afterItem: nil){
-                player.insertItem(playerItem, afterItem: nil)
-                self.delegate?.jukeboxDidFinishAppendingItem(self, item: item)
-            }
-        }
-    }
-    
-    func playItemAtIndex(index: Int) {
-        if let player = self.player {
-            if self.queuedItems.count > index {
-                player.removeAllItems()
-                player.pause()
-                for var i = index; i < self.queuedItems.count; i++ {
-                    if let item = self.queuedItems[i].playerItem {
-                        if player.canInsertItem(item, afterItem: nil) {
-                            item.seekToTime(kCMTimeZero)
-                            player.insertItem(item, afterItem: nil)
-                        }
-                    }
-                }
+            if shouldPlay {
                 player.play()
             }
         }
     }
     
+    // MARK:- Progress tracking -
+    
+    private func startProgressTimer(){
+        if let player = self.player {
+            if player.currentItem.duration.isValid {
+                self.progressObserver = player.addPeriodicTimeObserverForInterval(CMTimeMakeWithSeconds(0.1, Int32(NSEC_PER_SEC)), queue: nil, usingBlock: { [unowned self] (time : CMTime) -> Void in
+                    self.timerAction()
+                    })
+            }
+        }
+    }
+    
+    private func stopProgressTimer() {
+        if let player = self.player, let observer: AnyObject = self.progressObserver{
+            player.removeTimeObserver(observer)
+            self.progressObserver = nil
+        }
+    }
+    
+    // MARK:- Internal methods -
+    
     func configureObservers() {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "handleStall", name: AVPlayerItemPlaybackStalledNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "aPlaybackEnded", name: AVPlayerItemDidPlayToEndTimeNotification, object: nil)
     }
     
     func checkItemAlreadyExists(item : JukeboxItem) {
@@ -365,33 +403,34 @@ public class Jukebox : NSObject {
         self.player?.play()
     }
     
-    func aPlaybackEnded(){
+    func playerItemDidReachEnd(notification : NSNotification){
         
-        if playIndex == self.queuedItems.count - 1 {
-            // playback done
+        if playIndex >= self.queuedItems.count - 1 {
             self.stop()
+        } else {
+            self.playAtIndex(self.playIndex + 1)
         }
     }
     
     func timerAction() {
         if let item = self.player?.currentItem {
-            self.currentItem?.updateWithPlayerItem(item)
+            self.currentItem?.update()
             if let progress = self.currentItem?.currentTime {
                 self.delegate?.jukeboxPlaybackProgressDidChange(self)
-            }
-            
-            if self.currentItem?.currentTime == self.currentItem?.duration
-            {
-                self.stop()
             }
         }
     }
 }
 
-public class JukeboxItem {
+@objc public protocol JukeboxItemDelegate {
+    func jukeboxItemDidLoadPlayerItem(item : JukeboxItem)
+}
+
+public class JukeboxItem : NSObject, Printable {
     // MARK:- Properties -
     
-    let URL         :  NSURL
+    public let URL         :  NSURL
+    public var localTitle  :  String?
     
     // meta
     private(set) var duration    :   Double?
@@ -400,37 +439,66 @@ public class JukeboxItem {
     private(set) var album       :   String?
     private(set) var artist      :   String?
     private(set) var artwork     :   UIImage?
+    private      var delegate    :   JukeboxItemDelegate?
+    private      var didLoad   :   Bool = false
     
-    private(set) var playerItem : AVPlayerItem?
+    private var  playerItem : AVPlayerItem?
+    
+    public override var description: String {
+        get{
+            return "<\(self.localTitle)> : <\(self.URL.absoluteString)>"
+        }
+    }
     
     // MARK:- Initializer -
     
     public required init(url : NSURL) {
         URL = url
+        super.init()
         if URL.isFileReferenceURL()
         {
             self.configureMetadata()
         }
     }
     
-    // MARK:- Public methods -
+    // MARK:- Private methods -
     
-    func updateWithPlayerItem(item : AVPlayerItem) {
+    private func refreshPlayerItem(asset : AVAsset) {
+        self.playerItem = AVPlayerItem(asset: asset)
+        self.update()
+    }
+    
+    private func loadPlayerItem () {
         
-        if let asset = item.asset as? AVURLAsset
-        {
-           assert(self.URL == asset.URL, "URL mismatch!")
-            
-            if self.playerItem == nil {
-                self.playerItem = item
+        if let item = self.playerItem {
+            self.refreshPlayerItem(item.asset)
+            self.delegate?.jukeboxItemDidLoadPlayerItem(self)
+            return
+        } else {
+            if didLoad {
+                return
+            } else {
+                didLoad = true
             }
-            
+        }
+        
+        let asset = AVURLAsset(URL: self.URL, options: nil)
+        
+        // duration, tracks
+        asset.loadValuesAsynchronouslyForKeys(["playable", "duration"], completionHandler: { () -> Void in
+            dispatch_async(dispatch_get_main_queue()) {
+                self.refreshPlayerItem(asset)
+                self.delegate?.jukeboxItemDidLoadPlayerItem(self)
+            }
+        })
+    }
+    
+    private func update() {
+        if let item = self.playerItem {
             duration = CMTimeGetSeconds(item.asset.duration)
             currentTime = CMTimeGetSeconds(item.currentTime())
         }
     }
-    
-    // MARK:- Private methods -
     
     private func configureMetadata()
     {
@@ -466,4 +534,8 @@ public class JukeboxItem {
             })
         }
     }
+}
+
+private extension CMTime {
+    var isValid : Bool { return (flags & .Valid) != nil }
 }

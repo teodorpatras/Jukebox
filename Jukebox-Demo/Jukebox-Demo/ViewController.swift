@@ -28,9 +28,15 @@ class ViewController: UIViewController, JukeboxDelegate {
         super.viewDidLoad()
         
         self.configureUI()
-
-        jukebox = Jukebox(delegate: self, itemURLs: [NSURL(string: "http://megdadhashem.wapego.ru/files/56727/tubidy_mp3_e2afc5.mp3")!,
-                                                     NSURL(string: "http://www.maninblack.org/demos/We%20Are%20The%20Gonads.mp3")!])
+        
+        // Configure the jukebox with one single item
+        jukebox = Jukebox(delegate: self, items: [JukeboxItem(url: NSURL(string: "http://megdadhashem.wapego.ru/files/56727/tubidy_mp3_e2afc5.mp3")!)])
+        
+        /// Later add another item
+        let delay = dispatch_time(DISPATCH_TIME_NOW, Int64(3 * Double(NSEC_PER_SEC)))
+        dispatch_after(delay, dispatch_get_main_queue()) {
+            jukebox?.appendItem(JukeboxItem (url: NSURL(string: "http://www.maninblack.org/demos/We%20Are%20The%20Gonads.mp3")!), loadingAssets: true)
+        }
     }
     
     func configureUI ()
@@ -55,8 +61,8 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     // MARK:- JukeboxDelegate -
     
-    func jukeboxDidFinishAppendingItem(jukebox: Jukebox, item: JukeboxItem) {
-        println("\n DID FINISH APPENDING: \t \(item.URL)")
+    func jukeboxDidLoadItem(jukebox: Jukebox, item: JukeboxItem) {
+        
     }
     
     func jukeboxPlaybackProgressDidChange(jukebox: Jukebox) {
@@ -110,14 +116,16 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     
     @IBAction func playPauseAction() {
-        if self.jukebox?.state == .Playing {
-            self.jukebox?.pause()
-        } else {
-            if self.jukebox?.currentItem != nil {
+        if let state = self.jukebox?.state {
+            switch state {
+            case .Ready :
+                self.jukebox?.playAtIndex(0)
+            case .Playing :
+                self.jukebox?.pause()
+            case .Paused :
                 self.jukebox?.play()
-            } else {
-                jukebox?.playSingleItem(JukeboxItem(url: NSURL(string: "http://megdadhashem.wapego.ru/files/56727/tubidy_mp3_e2afc5.mp3")!))
-                jukebox?.enqueueItem(JukeboxItem(url: NSURL(string: "http://www.maninblack.org/demos/We%20Are%20The%20Gonads.mp3")!))
+            default:
+                self.jukebox?.stop()
             }
         }
     }
