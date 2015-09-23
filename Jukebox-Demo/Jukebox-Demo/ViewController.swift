@@ -147,9 +147,6 @@ class ViewController: UIViewController, JukeboxDelegate {
         let minutes = Int(time / 60)
         let seconds = Int(time) - minutes * 60
         
-        let secondsString = seconds >= 10 ? "\(seconds)" : "0\(seconds)"
-        let minutesString = minutes >= 10 ? "\(minutes)" : "0\(minutes)"
-        
         label.text = String(format: "%02d", minutes) + ":" + String(format: "%02d", seconds)
     }
     

@@ -25,7 +25,7 @@ import Foundation
 import AVFoundation
 import UIKit
 
-public enum JukeboxState : Int, Printable {
+public enum JukeboxState : Int, CustomStringConvertible {
     case Ready = 0
     case Playing
     case Paused
@@ -64,12 +64,12 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     // MARK:- Properties -
     private var player              :   AVPlayer?
     private var progressObserver    :   AnyObject!
-    private var playIndex           :   Int         = -1
-    private var queuedItems                         = [JukeboxItem]()
+    private var playIndex           =   -1
+    private var queuedItems         =   [JukeboxItem]()
 
     public var delegate             :   JukeboxDelegate?
     public var currentItem          :   JukeboxItem?
-    public var state                :   JukeboxState = .Ready
+    public var state                =   JukeboxState.Ready
     public var volume               :   Float
         {
         get {
@@ -85,31 +85,45 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     /**
     Create an instance with a delegate and an empty play queue
     
-    :param: delegate jukebox delegate
+    - parameter delegate: jukebox delegate
     
-    :returns: Jukebox instance
+    - returns: Jukebox instance
     */
-    public convenience init(delegate : JukeboxDelegate?) {
+    public convenience init(delegate : JukeboxDelegate) {
         self.init(delegate: delegate, items: [])
+    }
+    
+    /**
+    Create an instance with an empty play queue
+    
+    - returns: Jukebox instance
+    */
+    public override convenience init() {
+        self.init(delegate: nil, items : [])
     }
     
     /**
     Create an instance with a delegate and a list of items without loading their assets.
     
-    :param: delegate jukebox delegate
-    :param: items    array of items to be added to the play queue
+    - parameter delegate: jukebox delegate
+    - parameter items:    array of items to be added to the play queue
     
-    :returns: Jukebox instance
+    - returns: Jukebox instance
     */
     public required init (delegate : JukeboxDelegate?, items : [JukeboxItem]) {
         self.delegate = delegate
         super.init()
         
         self.configureObservers()
+
+        do {
+            // prepare the audio session
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            fatalError("Could not open the audio session, hence Jukebox is unusable!")
+        }
         
-        // prepare the audio session
-        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
-        AVAudioSession.sharedInstance().setActive(true, error: nil)
         UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
         
         self.queuedItems = items
@@ -125,15 +139,15 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     // MARK:- JukeboxItemDelegate -
     
     public func jukeboxItemDidLoadPlayerItem(item: JukeboxItem) {
-        println("Item loaded: \(item)")
+        print("Item loaded: \(item)")
         self.delegate?.jukeboxDidLoadItem(self, item: item)
-        let index = find(self.queuedItems, item)
+        let index = self.queuedItems.indexOf(item)
         
-        if let playItem = item.playerItem
-            where self.state == .Loading && playIndex == index {
-                self.playItem(playItem)
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerItemDidReachEnd:", name: AVPlayerItemDidPlayToEndTimeNotification, object: playItem)
-        }
+        guard let playItem = item.playerItem
+            where self.state == .Loading && playIndex == index else { return }
+        
+        self.playItem(playItem)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerItemDidReachEnd:", name: AVPlayerItemDidPlayToEndTimeNotification, object: playItem)
     }
     
     // MARK:- Public methods -
@@ -141,7 +155,7 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     /**
     Removes an item from the play queue
     
-    :param: item item to be removed
+    - parameter item: item to be removed
     */
     public func removeItem(item : JukeboxItem) {
         self.removeItemWithURL(item.URL)
@@ -150,12 +164,12 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     /**
     Removes an item from the play queue based on URL
     
-    :param: url the item URL
+    - parameter url: the item URL
     */
     public func removeItemWithURL(url : NSURL) {
         var index = -1
         
-        for (idx, item) in enumerate(queuedItems) {
+        for (idx, item) in queuedItems.enumerate() {
             if item.URL == url {
                 index = idx
                 break
@@ -170,8 +184,8 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     /**
     Appends and optionally loads an item
     
-    :param: item            the item to be appended to the play queue
-    :param: loadingAssets   flag indicating wether or not the item should load it's assets
+    - parameter item:            the item to be appended to the play queue
+    - parameter loadingAssets:   flag indicating wether or not the item should load it's assets
     */
     public func appendItem(item : JukeboxItem, loadingAssets : Bool) {
         self.checkItemAlreadyExists(item)
@@ -185,14 +199,14 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     /**
     Plays the item indicated by the passed index
     
-    :param: index index of the item to be played
+    - parameter index: index of the item to be played
     */
     public func playAtIndex(index : Int) {
         if (index > self.queuedItems.count - 1) {
             return
         }
         
-        if let item = self.queuedItems[index].playerItem where self.playIndex == index{
+        if self.queuedItems[index].playerItem != nil && self.playIndex == index {
             if self.state == .Paused {
                 // resume playing
                 self.state = .Playing
@@ -322,7 +336,7 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     /**
     Seeks to a certain second within the current AVPlayerItem and starts playing
     
-    :param: second the second to be seek to
+    - parameter second: the second to be seek to
     */
     public func seekToSecond(second: Int) {
         self.seekToSecond(second, shouldPlay: true)
@@ -355,26 +369,23 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
             return
         }
         
-        if let player = self.player, let item = self.currentItem {
-            player.seekToTime(CMTimeMake(Int64(second), 1))
-            item.update()
-            self.delegate?.jukeboxPlaybackProgressDidChange(self)
-            if shouldPlay {
-                player.play()
-            }
+        guard let player = self.player, let item = self.currentItem else {return}
+        
+        player.seekToTime(CMTimeMake(Int64(second), 1))
+        item.update()
+        self.delegate?.jukeboxPlaybackProgressDidChange(self)
+        if shouldPlay {
+            player.play()
         }
     }
     
     // MARK:- Progress tracking -
     
     private func startProgressTimer(){
-        if let player = self.player {
-            if player.currentItem.duration.isValid {
-                self.progressObserver = player.addPeriodicTimeObserverForInterval(CMTimeMakeWithSeconds(0.1, Int32(NSEC_PER_SEC)), queue: nil, usingBlock: { [unowned self] (time : CMTime) -> Void in
-                    self.timerAction()
-                    })
-            }
-        }
+        guard let player = self.player where player.currentItem?.duration.isValid == true else { return }
+        self.progressObserver = player.addPeriodicTimeObserverForInterval(CMTimeMakeWithSeconds(0.1, Int32(NSEC_PER_SEC)), queue: nil, usingBlock: { [unowned self] (time : CMTime) -> Void in
+            self.timerAction()
+        })
     }
     
     private func stopProgressTimer() {
@@ -413,12 +424,11 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     }
     
     func timerAction() {
-        if let item = self.player?.currentItem {
-            self.currentItem?.update()
-            if let progress = self.currentItem?.currentTime {
-                self.delegate?.jukeboxPlaybackProgressDidChange(self)
-            }
-        }
+        guard self.player?.currentItem != nil else { return }
+        self.currentItem?.update()
+
+        guard self.currentItem?.currentTime != nil else { return }
+        self.delegate?.jukeboxPlaybackProgressDidChange(self)
     }
 }
 
@@ -426,7 +436,7 @@ public class Jukebox : NSObject, JukeboxItemDelegate {
     func jukeboxItemDidLoadPlayerItem(item : JukeboxItem)
 }
 
-public class JukeboxItem : NSObject, Printable {
+public class JukeboxItem : NSObject {
     // MARK:- Properties -
     
     public let URL         :  NSURL
@@ -440,7 +450,7 @@ public class JukeboxItem : NSObject, Printable {
     private(set) var artist      :   String?
     private(set) var artwork     :   UIImage?
     private      var delegate    :   JukeboxItemDelegate?
-    private      var didLoad   :   Bool = false
+    private      var didLoad     =   false
     
     private var  playerItem : AVPlayerItem?
     
@@ -483,10 +493,22 @@ public class JukeboxItem : NSObject, Printable {
         }
         
         let asset = AVURLAsset(URL: self.URL, options: nil)
-        
-        // duration, tracks
-        asset.loadValuesAsynchronouslyForKeys(["playable", "duration"], completionHandler: { () -> Void in
+        asset.loadValuesAsynchronouslyForKeys(["playable"], completionHandler: { () -> Void in
+            
             dispatch_async(dispatch_get_main_queue()) {
+                
+                var e : NSError?
+                asset.statusOfValueForKey("playable", error: &e)
+                if let error = e {
+                    var message = "\n\n***** Jukebox fatal error*****\n\n"
+                    if error.code == -1022 {
+                        message += "It looks like you're using Xcode 7 and due to an App Transport Security issue (absence of SSL-based HTTP) the asset cannot be loaded from the specified URL: \"\(self.URL)\".\nTo fix this issue, append the following to your .plist file:\n\n<key>NSAppTransportSecurity</key>\n<dict>\n\t<key>NSAllowsArbitraryLoads</key>\n\t<true/>\n</dict>\n\n"
+                        fatalError(message)
+                    } else {
+                        fatalError("\(message)\(error.description)\n\n")
+                    }
+                }
+                
                 self.refreshPlayerItem(asset)
                 self.delegate?.jukeboxItemDidLoadPlayerItem(self)
             }
@@ -502,21 +524,23 @@ public class JukeboxItem : NSObject, Printable {
     
     private func configureMetadata()
     {
-        let metadataArray = AVPlayerItem(URL: self.URL).asset.commonMetadata as! [AVMetadataItem]
+        let metadataArray = AVPlayerItem(URL: self.URL).asset.commonMetadata 
         
         for item in metadataArray
         {
             item.loadValuesAsynchronouslyForKeys([AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
                 switch item.commonKey
                 {
-                case "title" :
+                case "title"? :
                     self.title = item.value as? String
-                case "albumName" :
+                case "albumName"? :
                     self.album = item.value as? String
-                case "artist" :
+                case "artist"? :
                     self.artist = item.value as? String
-                case "artwork" :
-                    let copiedValue: AnyObject = item.value.copyWithZone(nil)
+                case "artwork"? :
+                    
+                    guard let value = item.value else {return}
+                    let copiedValue: AnyObject = value.copyWithZone(nil)
                     
                     if let dict = copiedValue as? [NSObject : AnyObject] {
                         //AVMetadataKeySpaceID3
@@ -537,5 +561,5 @@ public class JukeboxItem : NSObject, Printable {
 }
 
 private extension CMTime {
-    var isValid : Bool { return (flags & .Valid) != nil }
+    var isValid : Bool { return (flags.intersect(.Valid)) != [] }
 }
