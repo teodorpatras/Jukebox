@@ -1,4 +1,4 @@
-![Jukebox: audio player in Swift](/../master/assets/jukebox.png)
+![Jukebox: audio player in Swift](https://raw.githubusercontent.com/teodorpatras/Jukebox/master/assets/jukebox.png)
 
 Jukebox is an iOS audio player written in Swift.
 
@@ -6,7 +6,7 @@ Jukebox is an iOS audio player written in Swift.
 
 - [x] Support for both remote and local audio files
 - [x] Controls for ``play``, ``pause``, ``stop``, ``replay``, ``play next``, ``play previous``, ``volume control`` and ``seek`` to a certain second.
-- [x] Background mode integration with `MPNowPlayingInfoCenter``
+- [x] Background mode integration with ``MPNowPlayingInfoCenter``
 
 
 ## Requirements
