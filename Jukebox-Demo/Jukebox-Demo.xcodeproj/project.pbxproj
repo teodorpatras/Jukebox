@@ -7,14 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		130D4C0B1C394653002BF7B4 /* JukeboxTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130D4C0A1C394653002BF7B4 /* JukeboxTestCase.swift */; };
+		133BFEFB1C392E5F00232766 /* JukeboxItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133BFEFA1C392E5F00232766 /* JukeboxItem.swift */; };
+		133BFEFD1C39393D00232766 /* JukeboxItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133BFEFC1C39393D00232766 /* JukeboxItemTests.swift */; };
 		E81A33141B8F192200540A31 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33131B8F192200540A31 /* AppDelegate.swift */; };
 		E81A33161B8F192200540A31 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33151B8F192200540A31 /* ViewController.swift */; };
 		E81A33191B8F192200540A31 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E81A33171B8F192200540A31 /* Main.storyboard */; };
 		E81A331B1B8F192200540A31 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E81A331A1B8F192200540A31 /* Images.xcassets */; };
 		E81A331E1B8F192200540A31 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = E81A331C1B8F192200540A31 /* LaunchScreen.xib */; };
-		E81A332A1B8F192200540A31 /* Jukebox_DemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33291B8F192200540A31 /* Jukebox_DemoTests.swift */; };
+		E81A332A1B8F192200540A31 /* JukeboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33291B8F192200540A31 /* JukeboxTests.swift */; };
 		E81A33351B8F19AE00540A31 /* Jukebox.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33341B8F19AE00540A31 /* Jukebox.swift */; };
-		E839C77A1BB301C0006BBC9A /* Jukebox.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33341B8F19AE00540A31 /* Jukebox.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +30,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		130D4C0A1C394653002BF7B4 /* JukeboxTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxTestCase.swift; sourceTree = "<group>"; };
+		133BFEFA1C392E5F00232766 /* JukeboxItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxItem.swift; sourceTree = "<group>"; };
+		133BFEFC1C39393D00232766 /* JukeboxItemTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxItemTests.swift; sourceTree = "<group>"; };
 		E81A330E1B8F192200540A31 /* Jukebox-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jukebox-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E81A33121B8F192200540A31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E81A33131B8F192200540A31 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -37,7 +42,7 @@
 		E81A331D1B8F192200540A31 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		E81A33231B8F192200540A31 /* Jukebox-DemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Jukebox-DemoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E81A33281B8F192200540A31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E81A33291B8F192200540A31 /* Jukebox_DemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jukebox_DemoTests.swift; sourceTree = "<group>"; };
+		E81A33291B8F192200540A31 /* JukeboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JukeboxTests.swift; sourceTree = "<group>"; };
 		E81A33341B8F19AE00540A31 /* Jukebox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jukebox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -102,7 +107,9 @@
 		E81A33261B8F192200540A31 /* Jukebox-DemoTests */ = {
 			isa = PBXGroup;
 			children = (
-				E81A33291B8F192200540A31 /* Jukebox_DemoTests.swift */,
+				130D4C0A1C394653002BF7B4 /* JukeboxTestCase.swift */,
+				133BFEFC1C39393D00232766 /* JukeboxItemTests.swift */,
+				E81A33291B8F192200540A31 /* JukeboxTests.swift */,
 				E81A33271B8F192200540A31 /* Supporting Files */,
 			);
 			path = "Jukebox-DemoTests";
@@ -120,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				E81A33341B8F19AE00540A31 /* Jukebox.swift */,
+				133BFEFA1C392E5F00232766 /* JukeboxItem.swift */,
 			);
 			name = Jukebox;
 			sourceTree = "<group>";
@@ -229,6 +237,7 @@
 				E81A33161B8F192200540A31 /* ViewController.swift in Sources */,
 				E81A33141B8F192200540A31 /* AppDelegate.swift in Sources */,
 				E81A33351B8F19AE00540A31 /* Jukebox.swift in Sources */,
+				133BFEFB1C392E5F00232766 /* JukeboxItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,8 +245,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E839C77A1BB301C0006BBC9A /* Jukebox.swift in Sources */,
-				E81A332A1B8F192200540A31 /* Jukebox_DemoTests.swift in Sources */,
+				E81A332A1B8F192200540A31 /* JukeboxTests.swift in Sources */,
+				130D4C0B1C394653002BF7B4 /* JukeboxTestCase.swift in Sources */,
+				133BFEFD1C39393D00232766 /* JukeboxItemTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +373,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "teodorpatras.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -374,6 +385,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "teodorpatras.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

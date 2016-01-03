@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import MediaPlayer
 
 class ViewController: UIViewController, JukeboxDelegate {
    
@@ -26,16 +27,18 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.configureUI()
         
-        // Configure the jukebox with one single item
-        jukebox = Jukebox(delegate: self, items: [JukeboxItem(url: NSURL(string: "http://megdadhashem.wapego.ru/files/56727/tubidy_mp3_e2afc5.mp3")!)])
+        // configure jukebox
+        self.jukebox = Jukebox(delegate: self, items: [
+            JukeboxItem(URL: NSURL(string: "http://www.maninblack.org/demos/02%20The%20NYC%20(There%20Will%20Always%20Be).mp3")!),
+            JukeboxItem(URL: NSURL(string: "http://www.maninblack.org/demos/I%20Dont%20Believe%20In%20Jah.mp3")!)
+            ])
         
         /// Later add another item
         let delay = dispatch_time(DISPATCH_TIME_NOW, Int64(3 * Double(NSEC_PER_SEC)))
         dispatch_after(delay, dispatch_get_main_queue()) {
-            jukebox?.appendItem(JukeboxItem (url: NSURL(string: "http://www.maninblack.org/demos/We%20Are%20The%20Gonads.mp3")!), loadingAssets: true)
+            self.jukebox?.appendItem(JukeboxItem (URL: NSURL(string: "http://www.maninblack.org/demos/We%20Are%20The%20Gonads.mp3")!), loadingAssets: true)
         }
     }
     
@@ -62,7 +65,7 @@ class ViewController: UIViewController, JukeboxDelegate {
     // MARK:- JukeboxDelegate -
     
     func jukeboxDidLoadItem(jukebox: Jukebox, item: JukeboxItem) {
-        
+        print("Jukebox did load: \(item.URL.lastPathComponent)")
     }
     
     func jukeboxPlaybackProgressDidChange(jukebox: Jukebox) {
@@ -90,10 +93,12 @@ class ViewController: UIViewController, JukeboxDelegate {
             self.volumeSlider.value = jukebox.volume
             self.playPauseButton.setImage(UIImage(named: jukebox.state == .Paused ? "playBtn" : "pauseBtn"), forState: .Normal)
         }
+        
+        print("Jukebox state changed to \(jukebox.state)")
     }
     
     // MARK:- Callbacks -
-
+    
     @IBAction func volumeSliderValueChanged() {
         if let jk = self.jukebox {
             jk.volume = self.volumeSlider.value
@@ -114,7 +119,6 @@ class ViewController: UIViewController, JukeboxDelegate {
         self.jukebox?.playNext()
     }
     
-    
     @IBAction func playPauseAction() {
         if let state = self.jukebox?.state {
             switch state {
@@ -129,6 +133,26 @@ class ViewController: UIViewController, JukeboxDelegate {
             }
         }
     }
+    
+    override func remoteControlReceivedWithEvent(event: UIEvent?) {
+        if event?.type == .RemoteControl {
+            switch event!.subtype {
+            case .RemoteControlPlay :
+                self.jukebox?.play()
+            case .RemoteControlPause :
+                self.jukebox?.pause()
+            case .RemoteControlNextTrack :
+                self.jukebox?.playNext()
+            case .RemoteControlPreviousTrack:
+                self.jukebox?.playPrevious()
+            default:
+                break
+            }
+        } else {
+            print("NO EVENT!!!")
+        }
+    }
+    
     
     @IBAction func replayAction() {
         self.resetUI()
