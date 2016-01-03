@@ -1,0 +1,49 @@
+//
+//  JukeboxItemTests.swift
+//  Jukebox-Demo
+//
+//  Created by Teodor Patras on 03/01/16.
+//  Copyright © 2016 Teodor Patras. All rights reserved.
+//
+
+import XCTest
+
+
+class JukeboxItemTests: JukeboxTestCase {
+    
+    func testAssetLoading() {
+        let item = JukeboxItem(URL: self.firstURL)
+        
+        item.loadPlayerItem()
+        
+        let expectation = self.expectationWithDescription("Item loaded")
+        
+        after(5) { () -> Void in
+            XCTAssertNotNil(item.playerItem)
+            XCTAssert(CMTimeGetSeconds(item.playerItem!.asset.duration) > 0)
+            expectation.fulfill()
+        }
+        
+        self.waitForExpectationsWithTimeout(7, handler: nil)
+    }
+    
+    func testAssetLoading_redundantCalls() {
+        let item = JukeboxItem(URL: self.secondURL)
+        
+        item.loadPlayerItem()
+        // redundant calls
+        item.loadPlayerItem()
+        item.loadPlayerItem()
+        item.loadPlayerItem()
+        
+        let expectation = self.expectationWithDescription("Item loaded")
+        
+        after(5) { () -> Void in
+            XCTAssertNotNil(item.playerItem)
+            XCTAssert(CMTimeGetSeconds(item.playerItem!.asset.duration) > 0)
+            expectation.fulfill()
+        }
+        
+        self.waitForExpectationsWithTimeout(7, handler: nil)
+    }
+}

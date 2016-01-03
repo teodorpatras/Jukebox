@@ -1,0 +1,455 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		13030D381C394E6E0056EC25 /* JukeboxTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130D4C0A1C394653002BF7B4 /* JukeboxTestCase.swift */; };
+		133BFEFB1C392E5F00232766 /* JukeboxItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133BFEFA1C392E5F00232766 /* JukeboxItem.swift */; };
+		133BFEFD1C39393D00232766 /* JukeboxItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133BFEFC1C39393D00232766 /* JukeboxItemTests.swift */; };
+		E81A33141B8F192200540A31 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33131B8F192200540A31 /* AppDelegate.swift */; };
+		E81A33161B8F192200540A31 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33151B8F192200540A31 /* ViewController.swift */; };
+		E81A33191B8F192200540A31 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E81A33171B8F192200540A31 /* Main.storyboard */; };
+		E81A331B1B8F192200540A31 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E81A331A1B8F192200540A31 /* Images.xcassets */; };
+		E81A331E1B8F192200540A31 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = E81A331C1B8F192200540A31 /* LaunchScreen.xib */; };
+		E81A332A1B8F192200540A31 /* JukeboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33291B8F192200540A31 /* JukeboxTests.swift */; };
+		E81A33351B8F19AE00540A31 /* Jukebox.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81A33341B8F19AE00540A31 /* Jukebox.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E81A33241B8F192200540A31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E81A33061B8F192200540A31 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E81A330D1B8F192200540A31;
+			remoteInfo = Jukebox;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		130D4C0A1C394653002BF7B4 /* JukeboxTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxTestCase.swift; sourceTree = "<group>"; };
+		133BFEFA1C392E5F00232766 /* JukeboxItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxItem.swift; sourceTree = "<group>"; };
+		133BFEFC1C39393D00232766 /* JukeboxItemTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxItemTests.swift; sourceTree = "<group>"; };
+		E81A330E1B8F192200540A31 /* Jukebox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jukebox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E81A33121B8F192200540A31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E81A33131B8F192200540A31 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E81A33151B8F192200540A31 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		E81A33181B8F192200540A31 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		E81A331A1B8F192200540A31 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		E81A331D1B8F192200540A31 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		E81A33231B8F192200540A31 /* Jukebox.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Jukebox.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E81A33281B8F192200540A31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E81A33291B8F192200540A31 /* JukeboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JukeboxTests.swift; sourceTree = "<group>"; };
+		E81A33341B8F19AE00540A31 /* Jukebox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Jukebox.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E81A330B1B8F192200540A31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E81A33201B8F192200540A31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E81A33051B8F192200540A31 = {
+			isa = PBXGroup;
+			children = (
+				E81A33101B8F192200540A31 /* Jukebox */,
+				E81A33261B8F192200540A31 /* JukeboxTests */,
+				E81A330F1B8F192200540A31 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E81A330F1B8F192200540A31 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E81A330E1B8F192200540A31 /* Jukebox.app */,
+				E81A33231B8F192200540A31 /* Jukebox.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E81A33101B8F192200540A31 /* Jukebox */ = {
+			isa = PBXGroup;
+			children = (
+				E81A33331B8F199F00540A31 /* Jukebox */,
+				E81A33131B8F192200540A31 /* AppDelegate.swift */,
+				E81A33151B8F192200540A31 /* ViewController.swift */,
+				E81A33171B8F192200540A31 /* Main.storyboard */,
+				E81A331A1B8F192200540A31 /* Images.xcassets */,
+				E81A331C1B8F192200540A31 /* LaunchScreen.xib */,
+				E81A33111B8F192200540A31 /* Supporting Files */,
+			);
+			path = Jukebox;
+			sourceTree = "<group>";
+		};
+		E81A33111B8F192200540A31 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E81A33121B8F192200540A31 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E81A33261B8F192200540A31 /* JukeboxTests */ = {
+			isa = PBXGroup;
+			children = (
+				130D4C0A1C394653002BF7B4 /* JukeboxTestCase.swift */,
+				133BFEFC1C39393D00232766 /* JukeboxItemTests.swift */,
+				E81A33291B8F192200540A31 /* JukeboxTests.swift */,
+				E81A33271B8F192200540A31 /* Supporting Files */,
+			);
+			path = JukeboxTests;
+			sourceTree = "<group>";
+		};
+		E81A33271B8F192200540A31 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E81A33281B8F192200540A31 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E81A33331B8F199F00540A31 /* Jukebox */ = {
+			isa = PBXGroup;
+			children = (
+				E81A33341B8F19AE00540A31 /* Jukebox.swift */,
+				133BFEFA1C392E5F00232766 /* JukeboxItem.swift */,
+			);
+			name = Jukebox;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E81A330D1B8F192200540A31 /* Jukebox */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E81A332D1B8F192200540A31 /* Build configuration list for PBXNativeTarget "Jukebox" */;
+			buildPhases = (
+				E81A330A1B8F192200540A31 /* Sources */,
+				E81A330B1B8F192200540A31 /* Frameworks */,
+				E81A330C1B8F192200540A31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Jukebox;
+			productName = Jukebox;
+			productReference = E81A330E1B8F192200540A31 /* Jukebox.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E81A33221B8F192200540A31 /* JukeboxTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E81A33301B8F192200540A31 /* Build configuration list for PBXNativeTarget "JukeboxTests" */;
+			buildPhases = (
+				E81A331F1B8F192200540A31 /* Sources */,
+				E81A33201B8F192200540A31 /* Frameworks */,
+				E81A33211B8F192200540A31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E81A33251B8F192200540A31 /* PBXTargetDependency */,
+			);
+			name = JukeboxTests;
+			productName = JukeboxTests;
+			productReference = E81A33231B8F192200540A31 /* Jukebox.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E81A33061B8F192200540A31 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
+				ORGANIZATIONNAME = "Teodor Patras";
+				TargetAttributes = {
+					E81A330D1B8F192200540A31 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					E81A33221B8F192200540A31 = {
+						CreatedOnToolsVersion = 6.4;
+						TestTargetID = E81A330D1B8F192200540A31;
+					};
+				};
+			};
+			buildConfigurationList = E81A33091B8F192200540A31 /* Build configuration list for PBXProject "Jukebox" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E81A33051B8F192200540A31;
+			productRefGroup = E81A330F1B8F192200540A31 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E81A330D1B8F192200540A31 /* Jukebox */,
+				E81A33221B8F192200540A31 /* JukeboxTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E81A330C1B8F192200540A31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E81A33191B8F192200540A31 /* Main.storyboard in Resources */,
+				E81A331E1B8F192200540A31 /* LaunchScreen.xib in Resources */,
+				E81A331B1B8F192200540A31 /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E81A33211B8F192200540A31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E81A330A1B8F192200540A31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E81A33161B8F192200540A31 /* ViewController.swift in Sources */,
+				E81A33141B8F192200540A31 /* AppDelegate.swift in Sources */,
+				E81A33351B8F19AE00540A31 /* Jukebox.swift in Sources */,
+				133BFEFB1C392E5F00232766 /* JukeboxItem.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E81A331F1B8F192200540A31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E81A332A1B8F192200540A31 /* JukeboxTests.swift in Sources */,
+				13030D381C394E6E0056EC25 /* JukeboxTestCase.swift in Sources */,
+				133BFEFD1C39393D00232766 /* JukeboxItemTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E81A33251B8F192200540A31 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E81A330D1B8F192200540A31 /* Jukebox */;
+			targetProxy = E81A33241B8F192200540A31 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		E81A33171B8F192200540A31 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E81A33181B8F192200540A31 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		E81A331C1B8F192200540A31 /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E81A331D1B8F192200540A31 /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E81A332B1B8F192200540A31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E81A332C1B8F192200540A31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E81A332E1B8F192200540A31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = Jukebox/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "teodorpatras.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Jukebox;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E81A332F1B8F192200540A31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = Jukebox/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "teodorpatras.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Jukebox;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		E81A33311B8F192200540A31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = JukeboxTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "teodorpatras.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Jukebox;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Jukebox.app/Jukebox";
+			};
+			name = Debug;
+		};
+		E81A33321B8F192200540A31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = JukeboxTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "teodorpatras.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Jukebox;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Jukebox.app/Jukebox";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E81A33091B8F192200540A31 /* Build configuration list for PBXProject "Jukebox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E81A332B1B8F192200540A31 /* Debug */,
+				E81A332C1B8F192200540A31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E81A332D1B8F192200540A31 /* Build configuration list for PBXNativeTarget "Jukebox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E81A332E1B8F192200540A31 /* Debug */,
+				E81A332F1B8F192200540A31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E81A33301B8F192200540A31 /* Build configuration list for PBXNativeTarget "JukeboxTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E81A33311B8F192200540A31 /* Debug */,
+				E81A33321B8F192200540A31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E81A33061B8F192200540A31 /* Project object */;
+}
