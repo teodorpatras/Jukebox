@@ -1,11 +1,15 @@
 ![Jukebox: audio player in Swift](https://raw.githubusercontent.com/teodorpatras/Jukebox/master/assets/jukebox.png)
 
+[![Version](https://img.shields.io/cocoapods/v/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
+[![License](https://img.shields.io/cocoapods/l/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
+[![Platform](https://img.shields.io/cocoapods/p/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
+
 Jukebox is an iOS audio player written in Swift.
 
 ## Features
 
-- [x] Support for both remote and local audio files
-- [x] Controls for ``play``, ``pause``, ``stop``, ``replay``, ``play next``, ``play previous``, ``volume control`` and ``seek`` to a certain second.
+- [x] Support for streaming both remote and local audio files
+- [x] Functions to ``play``, ``pause``, ``stop``, ``replay``, ``play next``, ``play previous``, ``control volume`` and ``seek`` to a certain second.
 - [x] Background mode integration with ``MPNowPlayingInfoCenter``
 
 
@@ -71,12 +75,6 @@ self.jukebox = Jukebox(delegate: self, items: [
     JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
     JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
     ])
-
-/// Later you can another item
-let delay = dispatch_time(DISPATCH_TIME_NOW, Int64(5 * Double(NSEC_PER_SEC)))
-dispatch_after(delay, dispatch_get_main_queue()) {
-    self.jukebox?.appendItem(JukeboxItem (URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!), loadingAssets: true)
-}
 ```
 
 2) Play and enjoy:
@@ -95,13 +93,17 @@ Class which encapsulates an audio URL. This class is used in order to provision 
 ### Attributes
 
 ```swift
-public  let URL :   NSURL
+public var localTitle       :   String?
+public let URL              :   NSURL
 
 private (set) public var playerItem  :   AVPlayerItem?
-
 // meta
 private (set) public var duration    :   Double?
 private (set) public var currentTime :   Double?
+private (set) public var title       :   String?
+private (set) public var album       :   String?
+private (set) public var artist      :   String?
+private (set) public var artwork     :   UIImage?
 ```
 
 ### Methods
@@ -152,48 +154,20 @@ Defines three methods to be implemented by the delegate in order to be notified 
 ### Attributes
 
 ```swift
-private (set) public var queuedItems      :   [JukeboxItem]!
-private (set) public var delegate         :   JukeboxDelegate?
+private (set) public var queuedItems      :   [JukeboxItem]
 private (set) public var state            :   JukeboxState
-
-public var volume       :   Float
-public var currentItem  :   JukeboxItem?
+private (set) public var currentItem      :   JukeboxItem?
+private (set) public var playIndex        =   Int
+              public var volume           :   Float
 ```
 
 ### Methods
 
 ```swift
 /**
-Create an instance with a delegate and a list of items without loading their assets.
-
-- parameter delegate: jukebox delegate
-- parameter items:    array of items to be added to the play queue
-
-- returns: Jukebox instance
+Starts item playback.
 */
-public required init (delegate : JukeboxDelegate? = nil, items : [JukeboxItem] = [JukeboxItem]())
-
-/**
-Removes an item from the play queue
-
-- parameter item: item to be removed
-*/
-public func removeItem(item : JukeboxItem)
-
-/**
-Removes an item from the play queue based on URL
-
-- parameter url: the item URL
-*/
-public func removeItemWithURL(url : NSURL)
-
-/**
-Appends and optionally loads an item
-
-- parameter item:            the item to be appended to the play queue
-- parameter loadingAssets:   flag indicating wether or not the item should load it's assets
-*/
-public func appendItem(item : JukeboxItem, loadingAssets : Bool)
+public func play()
 
 /**
 Plays the item indicated by the passed index
@@ -203,42 +177,64 @@ Plays the item indicated by the passed index
 public func playAtIndex(index : Int)
 
 /**
-Starts playing from the items queue in FIFO order. Call this method only if you previously added at least one item to the queue.
-*/
-public func play()
-
-/**
-Pauses the playback
+Pauses the playback.
 */
 public func pause()
 
 /**
-Stops the playback
+Stops the playback.
 */
 public func stop()
 
 /**
-Starts playback from the beginning of the queue
+Starts playback from the beginning of the queue.
 */
 public func replay()
 
 /**
-Plays the next item in the queue
+Plays the next item in the queue.
 */
 public func playNext()
 
 /**
-Restarts the current item if current item progress > 5s or plays the previous item in the queue
+Restarts the current item or plays the previous item in the queue
 */
 public func playPrevious()
+
+/**
+Restarts the playback for the current item
+*/
+public func replayCurrentItem()
 
 /**
 Seeks to a certain second within the current AVPlayerItem and starts playing
 
 - parameter second: the second to seek to
-- parameter shouldPlay: flag indicating wether or not the playback should start after seeking
+- parameter shouldPlay: pass true if playback should be resumed after seeking
 */
 public func seekToSecond(second : Int, shouldPlay: Bool = false)
+
+/**
+Appends and optionally loads an item
+
+- parameter item:            the item to be appended to the play queue
+- parameter loadingAssets:   pass true to load item's assets asynchronously
+*/
+public func appendItem(item : JukeboxItem, loadingAssets : Bool)
+
+/**
+Removes an item from the play queue
+
+- parameter item: item to be removed
+*/
+public func removeItem(item : JukeboxItem)
+
+/**
+ Removes all items from the play queue matching the URL
+
+ - parameter url: the item URL
+ */
+public func removeItems(withURL url : NSURL)
 ```
 
 ## License

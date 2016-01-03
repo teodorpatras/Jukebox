@@ -33,21 +33,21 @@ public class JukeboxItem {
     
     // MARK:- Properties -
     
-            let localTitle  :   String?
-            var delegate    :   JukeboxItemDelegate?
-    public  let URL         :   NSURL
-    private var didLoad     =   false
+            let identifier       :   String
+            var delegate         :   JukeboxItemDelegate?
+    private var didLoad          =   false
+    public  var localTitle       :   String?
+    public  let URL              :   NSURL
     
     private (set) public var playerItem  :   AVPlayerItem?
     
     // meta
     private (set) public var duration    :   Double?
     private (set) public var currentTime :   Double?
-    
-    private (set) var title       :   String?
-    private (set) var album       :   String?
-    private (set) var artist      :   String?
-    private (set) var artwork     :   UIImage?
+    private (set) public var title       :   String?
+    private (set) public var album       :   String?
+    private (set) public var artist      :   String?
+    private (set) public var artwork     :   UIImage?
     
     // MARK:- Initializer -
     
@@ -61,6 +61,7 @@ public class JukeboxItem {
     */
     public required init(URL : NSURL, localTitle : String? = nil) {
         self.URL = URL
+        self.identifier = NSUUID().UUIDString
         self.localTitle = localTitle
         if URL.filePathURL != nil{
             // local file

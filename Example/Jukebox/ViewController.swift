@@ -24,7 +24,7 @@ class ViewController: UIViewController, JukeboxDelegate {
     @IBOutlet weak var centerContainer: UIView!
     @IBOutlet weak var indicator: UIActivityIndicatorView!
     
-    var jukebox : Jukebox?
+    var jukebox : Jukebox!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,7 +39,7 @@ class ViewController: UIViewController, JukeboxDelegate {
         /// Later add another item
         let delay = dispatch_time(DISPATCH_TIME_NOW, Int64(3 * Double(NSEC_PER_SEC)))
         dispatch_after(delay, dispatch_get_main_queue()) {
-            self.jukebox?.appendItem(JukeboxItem (URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!), loadingAssets: true)
+            self.jukebox.appendItem(JukeboxItem (URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!), loadingAssets: true)
         }
     }
     
@@ -116,31 +116,33 @@ class ViewController: UIViewController, JukeboxDelegate {
     }
     
     @IBAction func progressSliderValueChanged() {
-        if let duration = self.jukebox?.currentItem?.duration {
-            self.jukebox?.seekToSecond(Int(Double(self.slider.value) * duration))
+        if let duration = self.jukebox.currentItem?.duration {
+            self.jukebox.seekToSecond(Int(Double(self.slider.value) * duration))
         }
     }
     
     @IBAction func prevAction() {
-        self.jukebox?.playPrevious()
+        if self.jukebox.currentItem?.currentTime > 5 || self.jukebox.playIndex == 0 {
+            self.jukebox.replayCurrentItem()
+        } else {
+            self.jukebox.playPrevious()
+        }
     }
     
     @IBAction func nextAction() {
-        self.jukebox?.playNext()
+        self.jukebox.playNext()
     }
     
     @IBAction func playPauseAction() {
-        if let state = self.jukebox?.state {
-            switch state {
+        switch self.jukebox.state {
             case .Ready :
-                self.jukebox?.playAtIndex(0)
+                self.jukebox.playAtIndex(0)
             case .Playing :
-                self.jukebox?.pause()
+                self.jukebox.pause()
             case .Paused :
-                self.jukebox?.play()
+                self.jukebox.play()
             default:
-                self.jukebox?.stop()
-            }
+                self.jukebox.stop()
         }
     }
     
@@ -148,13 +150,13 @@ class ViewController: UIViewController, JukeboxDelegate {
         if event?.type == .RemoteControl {
             switch event!.subtype {
             case .RemoteControlPlay :
-                self.jukebox?.play()
+                self.jukebox.play()
             case .RemoteControlPause :
-                self.jukebox?.pause()
+                self.jukebox.pause()
             case .RemoteControlNextTrack :
-                self.jukebox?.playNext()
+                self.jukebox.playNext()
             case .RemoteControlPreviousTrack:
-                self.jukebox?.playPrevious()
+                self.jukebox.playPrevious()
             default:
                 break
             }
@@ -166,13 +168,13 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     @IBAction func replayAction() {
         self.resetUI()
-        self.jukebox?.replay()
+        self.jukebox.replay()
         
     }
     
     @IBAction func stopAction() {
         self.resetUI()
-        self.jukebox?.stop()
+        self.jukebox.stop()
     }
     
     // MARK:- Helpers -
