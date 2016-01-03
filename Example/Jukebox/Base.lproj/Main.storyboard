@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="Jukebox_Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="S7o-IP-xhc">
+                                <rect key="frame" x="140" y="140" width="320" height="320"/>
+                                <subviews>
+                                    <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="err-OQ-gUf">
+                                        <rect key="frame" x="43" y="89" width="234" height="31"/>
+                                        <connections>
+                                            <action selector="progressSliderValueChanged" destination="BYZ-38-t0r" eventType="valueChanged" id="VKH-OE-Sho"/>
+                                        </connections>
+                                    </slider>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="00:20" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="78e-qk-4R7">
+                                        <rect key="frame" x="2" y="88" width="38" height="20"/>
+                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="13"/>
+                                        <color key="textColor" red="0.83550347219999999" green="0.086186216130000007" blue="0.10705392399999999" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="00:20" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1SF-Su-gvW">
+                                        <rect key="frame" x="276" y="88" width="38" height="20"/>
+                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="13"/>
+                                        <color key="textColor" red="0.83550347219999999" green="0.086186216130000007" blue="0.10705392399999999" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="center" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ALc-Qz-2bm">
+                                        <rect key="frame" x="123" y="127" width="75" height="75"/>
+                                        <state key="normal" image="playBtn">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="playPauseAction" destination="BYZ-38-t0r" eventType="touchUpInside" id="VYC-07-wGa"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="center" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="43g-I6-6xW">
+                                        <rect key="frame" x="8" y="207" width="75" height="75"/>
+                                        <state key="normal" image="restartBtn">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="replayAction" destination="BYZ-38-t0r" eventType="touchUpInside" id="pcv-Cd-uw2"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="center" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QQb-Au-Kol">
+                                        <rect key="frame" x="237" y="207" width="75" height="75"/>
+                                        <state key="normal" image="stopBtn">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="stopAction" destination="BYZ-38-t0r" eventType="touchUpInside" id="DGW-Dh-uHo"/>
+                                        </connections>
+                                    </button>
+                                    <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="2ne-wc-hgc">
+                                        <rect key="frame" x="6" y="278" width="308" height="31"/>
+                                        <connections>
+                                            <action selector="volumeSliderValueChanged" destination="BYZ-38-t0r" eventType="valueChanged" id="m9m-I9-M6x"/>
+                                        </connections>
+                                    </slider>
+                                    <button opaque="NO" contentMode="center" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LjW-ia-YHL">
+                                        <rect key="frame" x="8" y="127" width="75" height="75"/>
+                                        <state key="normal" image="prevBtn">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="prevAction" destination="BYZ-38-t0r" eventType="touchUpInside" id="LeY-TR-Nqb"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="center" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="s1N-hJ-lvJ">
+                                        <rect key="frame" x="231" y="127" width="75" height="75"/>
+                                        <state key="normal" image="nextBtn">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="nextAction" destination="BYZ-38-t0r" eventType="touchUpInside" id="JHT-qs-0sw"/>
+                                        </connections>
+                                    </button>
+                                    <activityIndicatorView opaque="NO" alpha="0.0" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="5m7-ab-s9u">
+                                        <rect key="frame" x="149" y="155" width="20" height="20"/>
+                                    </activityIndicatorView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Jukebox Demo" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yjT-px-vKu">
+                                        <rect key="frame" x="8" y="24" width="304" height="45"/>
+                                        <fontDescription key="fontDescription" type="system" weight="light" pointSize="40"/>
+                                        <color key="textColor" red="0.83550347219999999" green="0.086186216130000007" blue="0.10705392399999999" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.119978867" green="0.1302088079" blue="0.3084359217" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="tintColor" red="0.83550347219999999" green="0.086186216130000007" blue="0.10705392399999999" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="320" id="8Bi-kx-l1q"/>
+                                    <constraint firstAttribute="width" constant="320" id="8W1-OJ-kQn"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <constraints>
+                            <constraint firstAttribute="centerX" secondItem="S7o-IP-xhc" secondAttribute="centerX" id="csM-zO-NeB"/>
+                            <constraint firstAttribute="centerY" secondItem="S7o-IP-xhc" secondAttribute="centerY" id="v69-nU-Yp3"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="centerContainer" destination="S7o-IP-xhc" id="LJf-nk-7V0"/>
+                        <outlet property="currentTimeLabel" destination="78e-qk-4R7" id="Zf7-sp-ZMr"/>
+                        <outlet property="durationLabel" destination="1SF-Su-gvW" id="pTy-zg-tLs"/>
+                        <outlet property="indicator" destination="5m7-ab-s9u" id="f6f-Gt-vd4"/>
+                        <outlet property="playPauseButton" destination="ALc-Qz-2bm" id="bD3-Q1-8bh"/>
+                        <outlet property="replayButton" destination="43g-I6-6xW" id="OhI-MT-YS2"/>
+                        <outlet property="slider" destination="err-OQ-gUf" id="qgi-2t-YYp"/>
+                        <outlet property="stopButton" destination="QQb-Au-Kol" id="Qdo-jj-6CH"/>
+                        <outlet property="titleLabel" destination="yjT-px-vKu" id="dfk-EH-gZ2"/>
+                        <outlet property="volumeSlider" destination="2ne-wc-hgc" id="YdR-ud-HhG"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="323" y="217"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="nextBtn" width="128" height="128"/>
+        <image name="playBtn" width="128" height="128"/>
+        <image name="prevBtn" width="128" height="128"/>
+        <image name="restartBtn" width="128" height="128"/>
+        <image name="stopBtn" width="128" height="128"/>
+    </resources>
+</document>

@@ -1,0 +1,25 @@
+{
+  "name": "Jukebox",
+  "version": "0.1.0",
+  "summary": "A short description of Jukebox.",
+  "description": "",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/Jukebox",
+  "license": "MIT",
+  "authors": {
+    "Teodor Patras": "me@teodorpatras.com"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/Jukebox.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "requires_arc": true,
+  "source_files": "Pod/Classes/**/*",
+  "resource_bundles": {
+    "Jukebox": [
+      "Pod/Assets/*.png"
+    ]
+  }
+}

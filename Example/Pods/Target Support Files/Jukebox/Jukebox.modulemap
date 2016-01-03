@@ -1,0 +1,6 @@
+framework module Jukebox {
+  umbrella header "Jukebox-umbrella.h"
+
+  export *
+  module * { export * }
+}
