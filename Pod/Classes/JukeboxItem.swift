@@ -57,7 +57,7 @@ public class JukeboxItem {
     - parameter URL: local or remote URL of the audio file
     - parameter localTitle: an optional title for the file
     
-    - returns: Jukebox instance
+    - returns: JukeboxItem instance
     */
     public required init(URL : NSURL, localTitle : String? = nil) {
         self.URL = URL

@@ -93,9 +93,8 @@ Class which encapsulates an audio URL. This class is used in order to provision 
 ### Attributes
 
 ```swift
-public var localTitle       :   String?
-public let URL              :   NSURL
-
+              public var localTitle  :   String?
+              public let URL         :   NSURL
 private (set) public var playerItem  :   AVPlayerItem?
 // meta
 private (set) public var duration    :   Double?
@@ -105,22 +104,6 @@ private (set) public var album       :   String?
 private (set) public var artist      :   String?
 private (set) public var artwork     :   UIImage?
 ```
-
-### Methods
-
-```swift
-/**
-Create an instance with an URL and local title
-
-- parameter URL: local or remote URL of the audio file
-- parameter localTitle: an optional title for the file
-
-- returns: Jukebox instance
-*/
-public required init(URL : NSURL, localTitle : String? = nil)
-```
-
-
 
 Jukebox
 --------------
