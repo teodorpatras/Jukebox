@@ -28,10 +28,14 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configureUI()
+        configureUI()
+        // begin receiving remote events
+        UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
         
         // configure jukebox
-        self.jukebox = Jukebox(delegate: self, items: [
+        jukebox = Jukebox(delegate: self, items: [
+            JukeboxItem(URL: NSURL(string: "http://soundradio.hk/sound-radio.m3u")!),
+            JukeboxItem(URL: NSURL(string: "http://www.stephaniequinn.com/Music/Commercial%20DEMO%20-%2005.mp3")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
             ])
@@ -49,23 +53,23 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     func configureUI ()
     {
-        self.resetUI()
+        resetUI()
         
         let color = UIColor(red:0.84, green:0.09, blue:0.1, alpha:1)
         
-        self.indicator.color = color
-        self.slider.setThumbImage(UIImage(named: "sliderThumb"), forState: .Normal)
-        self.slider.minimumTrackTintColor = color
-        self.slider.maximumTrackTintColor = UIColor.blackColor()
+        indicator.color = color
+        slider.setThumbImage(UIImage(named: "sliderThumb"), forState: .Normal)
+        slider.minimumTrackTintColor = color
+        slider.maximumTrackTintColor = UIColor.blackColor()
         
-        self.volumeSlider.minimumTrackTintColor = color
-        self.volumeSlider.maximumTrackTintColor = UIColor.blackColor()
-        self.volumeSlider.thumbTintColor = color
+        volumeSlider.minimumTrackTintColor = color
+        volumeSlider.maximumTrackTintColor = UIColor.blackColor()
+        volumeSlider.thumbTintColor = color
         
-        self.titleLabel.textColor =  color
+        titleLabel.textColor =  color
         
-        self.centerContainer.layer.cornerRadius = 12
-        self.view.backgroundColor = UIColor.blackColor()
+        centerContainer.layer.cornerRadius = 12
+        view.backgroundColor = UIColor.blackColor()
     }
     
     // MARK:- JukeboxDelegate -
@@ -76,14 +80,15 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     func jukeboxPlaybackProgressDidChange(jukebox: Jukebox) {
         
-        if let currentTime = jukebox.currentItem?.currentTime, let duration = jukebox.currentItem?.duration  {
+        if let currentTime = jukebox.currentItem?.currentTime, let duration = jukebox.currentItem?.duration {
             let value = Float(currentTime / duration)
-            self.slider.value = value
-            self.populateLabelWithTime(self.currentTimeLabel, time: currentTime)
-            self.populateLabelWithTime(self.durationLabel, time: duration)
+            slider.value = value
+            populateLabelWithTime(currentTimeLabel, time: currentTime)
+            populateLabelWithTime(durationLabel, time: duration)
+        } else {
+            resetUI()
         }
     }
-    
     
     func jukeboxStateDidChange(jukebox: Jukebox) {
         
@@ -94,22 +99,25 @@ class ViewController: UIViewController, JukeboxDelegate {
         })
         
         if jukebox.state == .Ready {
-            self.playPauseButton.setImage(UIImage(named: "playBtn"), forState: .Normal)
+            playPauseButton.setImage(UIImage(named: "playBtn"), forState: .Normal)
         } else if jukebox.state == .Loading  {
-            self.playPauseButton.setImage(UIImage(named: "pauseBtn"), forState: .Normal)
+            playPauseButton.setImage(UIImage(named: "pauseBtn"), forState: .Normal)
         } else {
-            self.volumeSlider.value = jukebox.volume
-            self.playPauseButton.setImage(UIImage(named: jukebox.state == .Paused ? "playBtn" : "pauseBtn"), forState: .Normal)
+            volumeSlider.value = jukebox.volume
+            playPauseButton.setImage(UIImage(named: jukebox.state == .Paused ? "playBtn" : "pauseBtn"), forState: .Normal)
         }
         
         print("Jukebox state changed to \(jukebox.state)")
     }
     
-    func jukeboxDidReceiveRemoteEvent(jukebox: Jukebox, event: UIEvent) {
-        
-        //investigate further about this and add this method in the prerequisites section on README.MD
-        
-        switch event.subtype {
+    func jukeboxDidUpdateMetadata(jukebox: Jukebox, forItem: JukeboxItem) {
+        print("Item updated:\n\(forItem)")
+    }
+    
+    
+    override func remoteControlReceivedWithEvent(event: UIEvent?) {
+        if event?.type == .RemoteControl {
+            switch event!.subtype {
             case .RemoteControlPlay :
                 jukebox.play()
             case .RemoteControlPause :
@@ -119,60 +127,67 @@ class ViewController: UIViewController, JukeboxDelegate {
             case .RemoteControlPreviousTrack:
                 jukebox.playPrevious()
             case .RemoteControlTogglePlayPause:
-                playPauseAction()
+                if jukebox.state == .Playing {
+                    jukebox.pause()
+                } else {
+                    jukebox.play()
+                }
             default:
                 break
+            }
+        } else {
+            print("NO EVENT!!!")
         }
     }
     
     // MARK:- Callbacks -
     
     @IBAction func volumeSliderValueChanged() {
-        if let jk = self.jukebox {
-            jk.volume = self.volumeSlider.value
+        if let jk = jukebox {
+            jk.volume = volumeSlider.value
         }
     }
     
     @IBAction func progressSliderValueChanged() {
-        if let duration = self.jukebox.currentItem?.duration {
-            self.jukebox.seekToSecond(Int(Double(self.slider.value) * duration))
+        if let duration = jukebox.currentItem?.duration {
+            jukebox.seekToSecond(Int(Double(slider.value) * duration))
         }
     }
     
     @IBAction func prevAction() {
-        if self.jukebox.currentItem?.currentTime > 5 || self.jukebox.playIndex == 0 {
-            self.jukebox.replayCurrentItem()
+        if jukebox.currentItem?.currentTime > 5 || jukebox.playIndex == 0 {
+            jukebox.replayCurrentItem()
         } else {
-            self.jukebox.playPrevious()
+            jukebox.playPrevious()
         }
     }
     
     @IBAction func nextAction() {
-        self.jukebox.playNext()
+        jukebox.playNext()
     }
     
     @IBAction func playPauseAction() {
-        switch self.jukebox.state {
+        switch jukebox.state {
             case .Ready :
-                self.jukebox.playAtIndex(0)
+                jukebox.playAtIndex(0)
             case .Playing :
-                self.jukebox.pause()
+                jukebox.pause()
             case .Paused :
-                self.jukebox.play()
+                jukebox.play()
             default:
-                self.jukebox.stop()
+                jukebox.stop()
         }
     }
     
     @IBAction func replayAction() {
-        self.resetUI()
-        self.jukebox.replay()
+        resetUI()
+        jukebox.replay()
         
     }
     
     @IBAction func stopAction() {
-        self.resetUI()
-        self.jukebox.stop()
+        resetUI()
+        jukebox.stop()
     }
     
     // MARK:- Helpers -
@@ -187,9 +202,9 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     func resetUI()
     {
-        self.durationLabel.text = "00:00"
-        self.currentTimeLabel.text = "00:00"
-        self.slider.value = 0
+        durationLabel.text = "00:00"
+        currentTimeLabel.text = "00:00"
+        slider.value = 0
     }
 }
 

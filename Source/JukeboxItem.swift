@@ -27,9 +27,10 @@ import MediaPlayer
 
 protocol JukeboxItemDelegate : class {
     func jukeboxItemDidLoadPlayerItem(item : JukeboxItem)
+    func jukeboxItemDidUpdate(item: JukeboxItem)
 }
 
-public class JukeboxItem {
+public class JukeboxItem: NSObject {
     
     // MARK:- Properties -
     
@@ -49,6 +50,8 @@ public class JukeboxItem {
     private (set) public var artist      :   String?
     private (set) public var artwork     :   UIImage?
     
+    private var timer: NSTimer?
+    
     // MARK:- Initializer -
     
     /**
@@ -63,19 +66,35 @@ public class JukeboxItem {
         self.URL = URL
         self.identifier = NSUUID().UUIDString
         self.localTitle = localTitle
-        if URL.filePathURL != nil{
-            // local file
-            self.configureMetadata()
+        super.init()
+        configureMetadata()
+    }
+    
+    override public func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+        
+        if keyPath == "timedMetadata" {
+            
+            if let item = playerItem where item === object {
+                guard let metadata = item.timedMetadata else { return }
+                for item in metadata {
+                    process(metaItem: item)
+                }
+            }
+            scheduleNotification()
         }
+    }
+    
+    deinit {
+        playerItem?.removeObserver(self, forKeyPath: "timedMetadata")
     }
     
     // MARK: - Internal methods -
     
     func loadPlayerItem () {
         
-        if let item = self.playerItem {
-            self.refreshPlayerItem(item.asset)
-            self.delegate?.jukeboxItemDidLoadPlayerItem(self)
+        if let item = playerItem {
+            refreshPlayerItem(item.asset)
+            delegate?.jukeboxItemDidLoadPlayerItem(self)
             return
         } else if didLoad {
             return
@@ -91,15 +110,21 @@ public class JukeboxItem {
     }
     
     func refreshPlayerItem(asset : AVAsset) {
-        self.playerItem = AVPlayerItem(asset: asset)
+        playerItem?.removeObserver(self, forKeyPath: "timedMetadata")
+        playerItem = AVPlayerItem(asset: asset)
+        playerItem?.addObserver(self, forKeyPath: "timedMetadata", options: NSKeyValueObservingOptions.New, context: nil)
         update()
     }
     
     func update() {
-        if let item = self.playerItem {
-            duration = CMTimeGetSeconds(item.asset.duration)
-            currentTime = CMTimeGetSeconds(item.currentTime())
+        if let item = playerItem {
+            duration = item.asset.duration.seconds
+            currentTime = item.currentTime().seconds
         }
+    }
+    
+    public override var description: String {
+        return "<JukeboxItem:\ntitle: \(title)\nalbum: \(album)\nartist:\(artist)\nduration : \(duration),\ncurrentTime : \(currentTime)\nURL: \(URL)>"
     }
     
     // MARK:- Private methods -
@@ -110,7 +135,7 @@ public class JukeboxItem {
         if let error = e {
             var message = "\n\n***** Jukebox fatal error*****\n\n"
             if error.code == -1022 {
-                message += "It looks like you're using Xcode 7 and due to an App Transport Security issue (absence of SSL-based HTTP) the asset cannot be loaded from the specified URL: \"\(self.URL)\".\nTo fix this issue, append the following to your .plist file:\n\n<key>NSAppTransportSecurity</key>\n<dict>\n\t<key>NSAllowsArbitraryLoads</key>\n\t<true/>\n</dict>\n\n"
+                message += "It looks like you're using Xcode 7 and due to an App Transport Security issue (absence of SSL-based HTTP) the asset cannot be loaded from the specified URL: \"\(URL)\".\nTo fix this issue, append the following to your .plist file:\n\n<key>NSAppTransportSecurity</key>\n<dict>\n\t<key>NSAllowsArbitraryLoads</key>\n\t<true/>\n</dict>\n\n"
                 fatalError(message)
             } else {
                 fatalError("\(message)\(error.description)\n\n")
@@ -118,8 +143,20 @@ public class JukeboxItem {
         }
     }
     
+    private func scheduleNotification() {
+        timer?.invalidate()
+        timer = nil
+        timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
+    }
+    
+    func notifyDelegate() {
+        timer?.invalidate()
+        timer = nil
+        self.delegate?.jukeboxItemDidUpdate(self)
+    }
+    
     private func loadAsync(completion : (asset : AVURLAsset) -> ()) {
-        let asset = AVURLAsset(URL: self.URL, options: nil)
+        let asset = AVURLAsset(URL: URL, options: nil)
         
         asset.loadValuesAsynchronouslyForKeys(["duration"], completionHandler: { () -> Void in
             dispatch_async(dispatch_get_main_queue()) {
@@ -130,25 +167,34 @@ public class JukeboxItem {
     
     private func configureMetadata()
     {
-        let metadataArray = AVPlayerItem(URL: self.URL).asset.commonMetadata
-        
-        for item in metadataArray
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+            let metadataArray = AVPlayerItem(URL: self.URL).asset.commonMetadata
+            
+            for item in metadataArray
+            {
+                item.loadValuesAsynchronouslyForKeys([AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
+                    self.process(metaItem: item)
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.scheduleNotification()
+                    })
+                })
+            }
+        }
+    }
+    
+    private func process(metaItem item: AVMetadataItem) {
+        switch item.commonKey
         {
-            item.loadValuesAsynchronouslyForKeys([AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
-                switch item.commonKey
-                {
-                case "title"? :
-                    self.title = item.value as? String
-                case "albumName"? :
-                    self.album = item.value as? String
-                case "artist"? :
-                    self.artist = item.value as? String
-                case "artwork"? :
-                    self.processArtwork(forMetadataItem : item)
-                default :
-                    break
-                }
-            })
+        case "title"? :
+            title = item.value as? String
+        case "albumName"? :
+            album = item.value as? String
+        case "artist"? :
+            artist = item.value as? String
+        case "artwork"? :
+            processArtwork(forMetadataItem : item)
+        default :
+            break
         }
     }
     
@@ -159,11 +205,19 @@ public class JukeboxItem {
         if let dict = copiedValue as? [NSObject : AnyObject] {
             //AVMetadataKeySpaceID3
             if let imageData = dict["data"] as? NSData {
-                self.artwork = UIImage(data: imageData)
+                artwork = UIImage(data: imageData)
             }
         } else if let data = copiedValue as? NSData{
             //AVMetadataKeySpaceiTunes
-            self.artwork = UIImage(data: data)
+            artwork = UIImage(data: data)
         }
+    }
+}
+
+private extension CMTime {
+    var seconds: Double? {
+        let time = CMTimeGetSeconds(self)
+        guard time.isNaN == false else { return nil }
+        return time
     }
 }
