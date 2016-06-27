@@ -26,29 +26,32 @@ import AVFoundation
 import MediaPlayer
 
 protocol JukeboxItemDelegate : class {
-    func jukeboxItemDidLoadPlayerItem(item : JukeboxItem)
+    func jukeboxItemDidLoadPlayerItem(item: JukeboxItem)
     func jukeboxItemDidUpdate(item: JukeboxItem)
 }
 
 public class JukeboxItem: NSObject {
     
+    public struct Meta {
+        private(set) public var duration: Double?
+        private(set) public var title: String?
+        private(set) public var album: String?
+        private(set) public var artist: String?
+        private(set) public var artwork: UIImage?
+    }
+    
     // MARK:- Properties -
     
-            let identifier       :   String
-            var delegate         :   JukeboxItemDelegate?
-    private var didLoad          =   false
-    public  var localTitle       :   String?
-    public  let URL              :   NSURL
+            let identifier: String
+            var delegate: JukeboxItemDelegate?
+    private var didLoad = false
+    public  var localTitle: String?
+    public  let URL: NSURL
     
-    private (set) public var playerItem  :   AVPlayerItem?
-    
-    // meta
-    private (set) public var duration    :   Double?
-    private (set) public var currentTime :   Double?
-    private (set) public var title       :   String?
-    private (set) public var album       :   String?
-    private (set) public var artist      :   String?
-    private (set) public var artwork     :   UIImage?
+    private(set) public var playerItem: AVPlayerItem?
+    private (set) public var currentTime: Double?
+    private(set) public lazy var meta = Meta()
+
     
     private var timer: NSTimer?
     private let observedValue = "timedMetadata"
@@ -77,7 +80,7 @@ public class JukeboxItem: NSObject {
             if let item = playerItem where item === object {
                 guard let metadata = item.timedMetadata else { return }
                 for item in metadata {
-                    process(metaItem: item)
+                    meta.process(metaItem: item)
                 }
             }
             scheduleNotification()
@@ -121,13 +124,13 @@ public class JukeboxItem: NSObject {
     
     func update() {
         if let item = playerItem {
-            duration = item.asset.duration.seconds
+            meta.duration = item.asset.duration.seconds
             currentTime = item.currentTime().seconds
         }
     }
     
     public override var description: String {
-        return "<JukeboxItem:\ntitle: \(title)\nalbum: \(album)\nartist:\(artist)\nduration : \(duration),\ncurrentTime : \(currentTime)\nURL: \(URL)>"
+        return "<JukeboxItem:\ntitle: \(meta.title)\nalbum: \(meta.album)\nartist:\(meta.artist)\nduration : \(meta.duration),\ncurrentTime : \(currentTime)\nURL: \(URL)>"
     }
     
     // MARK:- Private methods -
@@ -176,7 +179,7 @@ public class JukeboxItem: NSObject {
             for item in metadataArray
             {
                 item.loadValuesAsynchronouslyForKeys([AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
-                    self.process(metaItem: item)
+                    self.meta.process(metaItem: item)
                     dispatch_async(dispatch_get_main_queue(), {
                         self.scheduleNotification()
                     })
@@ -184,8 +187,11 @@ public class JukeboxItem: NSObject {
             }
         }
     }
-    
-    private func process(metaItem item: AVMetadataItem) {
+}
+
+private extension JukeboxItem.Meta {
+    mutating func process(metaItem item: AVMetadataItem) {
+        
         switch item.commonKey
         {
         case "title"? :
@@ -201,8 +207,8 @@ public class JukeboxItem: NSObject {
         }
     }
     
-    private func processArtwork(fromMetadataItem item: AVMetadataItem) {
-        guard let value = item.value else {return}
+    mutating func processArtwork(fromMetadataItem item: AVMetadataItem) {
+        guard let value = item.value else { return }
         let copiedValue: AnyObject = value.copyWithZone(nil)
         
         if let dict = copiedValue as? [NSObject : AnyObject] {

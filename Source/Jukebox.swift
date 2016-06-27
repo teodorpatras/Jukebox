@@ -301,9 +301,9 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     private func updateInfoCenter() {
         guard let item = currentItem else {return}
         
-        let title = (item.title ?? item.localTitle) ?? item.URL.lastPathComponent!
+        let title = (item.meta.title ?? item.localTitle) ?? item.URL.lastPathComponent!
         let currentTime = item.currentTime ?? 0
-        let duration = item.duration ?? 0
+        let duration = item.meta.duration ?? 0
         let trackNumber = playIndex
         let trackCount = queuedItems.count
         
@@ -316,15 +316,15 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
             MPMediaItemPropertyMediaType : MPMediaType.AnyAudio.rawValue
         ]
         
-        if let artist = item.artist {
+        if let artist = item.meta.artist {
             nowPlayingInfo[MPMediaItemPropertyArtist] = artist
         }
         
-        if let album = item.album {
+        if let album = item.meta.album {
             nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = album
         }
         
-        if let img = currentItem?.artwork {
+        if let img = currentItem?.meta.artwork {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: img)
         }
         
