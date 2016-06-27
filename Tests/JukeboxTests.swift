@@ -21,7 +21,7 @@ class JukeboxTests: JukeboxTestCase {
     
     func testJukeboxDoesNotPlay() {
         let jukebox = Jukebox()
-        jukebox.appendItem(JukeboxItem(URL: self.firstURL), loadingAssets: true)
+        jukebox.append(item: JukeboxItem(URL: self.firstURL), loadingAssets: true)
         
         let expectation = self.expectationWithDescription("Jukebox does not play")
         
@@ -37,7 +37,7 @@ class JukeboxTests: JukeboxTestCase {
         let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])
         jukebox.play()
         
-        jukebox.appendItem(JukeboxItem(URL: self.secondURL), loadingAssets: false)
+        jukebox.append(item: JukeboxItem(URL: self.secondURL), loadingAssets: false)
         
         let expectation = self.expectationWithDescription("Jukebox Plays")
         
@@ -60,8 +60,8 @@ class JukeboxTests: JukeboxTestCase {
     
     func testJukeboxCurrentItem_playFromLast() {
         let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])
-        jukebox.appendItem(JukeboxItem(URL: secondURL), loadingAssets: true)
-        jukebox.playAtIndex(1)
+        jukebox.append(item: JukeboxItem(URL: secondURL), loadingAssets: true)
+        jukebox.play(atIndex: 1)
         
         let expectation = self.expectationWithDescription("Jukebox Plays")
         
