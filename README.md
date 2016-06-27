@@ -1,25 +1,31 @@
 ![Jukebox: audio player in Swift](https://raw.githubusercontent.com/teodorpatras/Jukebox/master/assets/jukebox.png)
 
 [![Version](https://img.shields.io/cocoapods/v/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
+[![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![License](https://img.shields.io/cocoapods/l/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
 [![Platform](https://img.shields.io/cocoapods/p/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
+[![Build Status](https://travis-ci.org/teodorpatras/Jukebox.svg)](https://travis-ci.org/teodorpatras/Jukebox)
 
 Jukebox is an iOS audio player written in Swift.
 
-## Features
+# Table of Contents
+1. [Features](#features)
+3. [Installation](#installation)
+4. [Supported OS & SDK versions](#supported-versions)
+5. [Usage](#usage)
+6. [Handling remote events](#remote-events)
+7. [Delegation] (#delegation)
+8. [License](#license)
+9. [Contact](#contact)
+
+##<a name="features"> Features </a>
 
 - [x] Support for streaming both remote and local audio files
+- [x] Support for streaming live audio feeds
 - [x] Functions to ``play``, ``pause``, ``stop``, ``replay``, ``play next``, ``play previous``, ``control volume`` and ``seek`` to a certain second.
 - [x] Background mode integration with ``MPNowPlayingInfoCenter``
 
-
-## Requirements
-
-- iOS 8.0+
-- Xcode 7+
-
-
-Installation
+<a name="installation"> Installation </a>
 --------------
 
 ### CocoaPods
@@ -39,7 +45,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Jukebox', '~> 0.1.0'
+pod 'Jukebox', '~> 0.1.2'
 ```
 
 Then, run the following command:
@@ -47,7 +53,38 @@ Then, run the following command:
 ```bash
 $ pod install
 ```
-## Prerequisites
+
+### Carthage
+
+[Carthage](https://github.com/Carthage/Carthage) is a decentralized dependency manager that builds your dependencies and provides you with binary frameworks.
+
+You can install Carthage with [Homebrew](http://brew.sh/) using the following command:
+
+```bash
+$ brew update
+$ brew install carthage
+```
+
+To integrate `Jukebox` into your Xcode project using Carthage, specify it in your `Cartfile`:
+
+```ogdl
+github "teodorpatras/Jukebox"
+```
+
+Run `carthage update` to build the framework and drag the built `Jukebox.framework` into your Xcode project.
+
+### Manually
+
+If you prefer not to use either of the aforementioned dependency managers, you can integrate EasyTipView into your project manually.
+
+##<a name="supported-versions"> Supported OS & SDK versions </a>
+
+- iOS 8.0+
+- Xcode 7+
+
+##<a name="usage"> Usage </a>
+
+### Prerequisites
 
 * In order to support background mode, append the following to your ``Info.plist``:
 
@@ -57,7 +94,9 @@ $ pod install
     <string>audio</string>
 </array>
 ```
+
 * If you want to stream from ``http://`` URLs, append the following to your ``Info.plist``:
+
 ```
 <key>NSAppTransportSecurity</key>
 <dict>
@@ -66,12 +105,13 @@ $ pod install
 </dict>
 ```
 
-## Usage
+### Getting started
 
 1) Create an instance of ``Jukebox``:
+
 ```swift
 // configure jukebox
-self.jukebox = Jukebox(delegate: self, items: [
+jukebox = Jukebox(delegate: self, items: [
     JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
     JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
     ])
@@ -80,150 +120,61 @@ self.jukebox = Jukebox(delegate: self, items: [
 2) Play and enjoy:
 
 ```swift
-self.jukebox.play()
+jukebox.play()
 ```
 
-## Classes
+##<a name="remote-events"> Handling remove events </a>
 
-JukeboxItem
---------------
+In order to handle remote events, you should do the following:
 
-Class which encapsulates an audio URL. This class is used in order to provision a ``Jukebox`` instance with playable items.
+* First, you need to call for receiving remote events:
 
-### Attributes
+`UIApplication.sharedApplication().beginReceivingRemoteControlEvents()`
 
-```swift
-              public var localTitle  :   String?
-              public let URL         :   NSURL
-private (set) public var playerItem  :   AVPlayerItem?
-// meta
-private (set) public var duration    :   Double?
-private (set) public var currentTime :   Double?
-private (set) public var title       :   String?
-private (set) public var album       :   String?
-private (set) public var artist      :   String?
-private (set) public var artwork     :   UIImage?
+* Secondly, override `remoteControlReceivedWithEvent(event:)`:
+
 ```
-
-Jukebox
---------------
-
-The main class responsible with the playback management.
-
-### Custom types
-
-```swift
-public enum JukeboxState : Int, CustomStringConvertible {
-    case Ready = 0
-    case Playing
-    case Paused
-    case Loading
-    case Failed
+override func remoteControlReceivedWithEvent(event: UIEvent?) {
+    if event?.type == .RemoteControl {
+        switch event!.subtype {
+        case .RemoteControlPlay :
+            jukebox.play()
+        case .RemoteControlPause :
+            jukebox.pause()
+        case .RemoteControlNextTrack :
+            jukebox.playNext()
+        case .RemoteControlPreviousTrack:
+            jukebox.playPrevious()
+        case .RemoteControlTogglePlayPause:
+            if jukebox.state == .Playing {
+                jukebox.pause()
+            } else {
+                jukebox.play()
+            }
+        default:
+            break
+        }
+   }
 }
 ```
 
-Defines the five possible states that ``Jukebox`` can be in.
+##<a name="delegation"> Delegation </a>
 
-```swift
-public protocol JukeboxDelegate : class {
-    func jukeboxStateDidChange(jukebox : Jukebox)
+`Jukebox` defines a delegate protocol which you can use if you want to be announced when about custom events:
+
+```
+public protocol JukeboxDelegate: class {
+    func jukeboxStateDidChange(state : Jukebox)
     func jukeboxPlaybackProgressDidChange(jukebox : Jukebox)
     func jukeboxDidLoadItem(jukebox : Jukebox, item : JukeboxItem)
+    func jukeboxDidUpdateMetadata(jukebox : Jukebox, forItem: JukeboxItem)
 }
 ```
 
-Defines three methods to be implemented by the delegate in order to be notified when certain events occur.
-
-### Attributes
-
-```swift
-private (set) public var queuedItems      :   [JukeboxItem]
-private (set) public var state            :   JukeboxState
-private (set) public var currentItem      :   JukeboxItem?
-private (set) public var playIndex        =   Int
-              public var volume           :   Float
-```
-
-### Methods
-
-```swift
-/**
-Starts item playback.
-*/
-public func play()
-
-/**
-Plays the item indicated by the passed index
-
-- parameter index: index of the item to be played
-*/
-public func playAtIndex(index : Int)
-
-/**
-Pauses the playback.
-*/
-public func pause()
-
-/**
-Stops the playback.
-*/
-public func stop()
-
-/**
-Starts playback from the beginning of the queue.
-*/
-public func replay()
-
-/**
-Plays the next item in the queue.
-*/
-public func playNext()
-
-/**
-Restarts the current item or plays the previous item in the queue
-*/
-public func playPrevious()
-
-/**
-Restarts the playback for the current item
-*/
-public func replayCurrentItem()
-
-/**
-Seeks to a certain second within the current AVPlayerItem and starts playing
-
-- parameter second: the second to seek to
-- parameter shouldPlay: pass true if playback should be resumed after seeking
-*/
-public func seekToSecond(second : Int, shouldPlay: Bool = false)
-
-/**
-Appends and optionally loads an item
-
-- parameter item:            the item to be appended to the play queue
-- parameter loadingAssets:   pass true to load item's assets asynchronously
-*/
-public func appendItem(item : JukeboxItem, loadingAssets : Bool)
-
-/**
-Removes an item from the play queue
-
-- parameter item: item to be removed
-*/
-public func removeItem(item : JukeboxItem)
-
-/**
- Removes all items from the play queue matching the URL
-
- - parameter url: the item URL
- */
-public func removeItems(withURL url : NSURL)
-```
-
-## License
+##<a name="license"> License </a>
 
 ```Jukebox``` is released under the MIT license. See the ```LICENSE``` file for details.
 
-## Contact
+##<a name="contact"> Contact </a>
 
 You can follow or drop me a line on [my Twitter account](https://twitter.com/teodorpatras). If you find any issues on the project, you can open a ticket. Pull requests are also welcome.

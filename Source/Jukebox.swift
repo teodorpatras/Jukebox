@@ -42,7 +42,7 @@ extension Jukebox {
      Starts item playback.
      */
     public func play() {
-        playAtIndex(playIndex)
+        play(atIndex: playIndex)
     }
     
     /**
@@ -50,7 +50,7 @@ extension Jukebox {
      
      - parameter index: index of the item to be played
      */
-    public func playAtIndex(index : Int) {
+    public func play(atIndex index: Int) {
         guard index < queuedItems.count && index >= 0 else {return}
         
         configureBackgroundAudioTask()
@@ -64,7 +64,7 @@ extension Jukebox {
             playIndex = index
             
             if let asset = queuedItems[index].playerItem?.asset {
-                playCurrentItemWithAsset(asset)
+                playCurrentItem(withAsset: asset)
             } else {
                 loadPlaybackItem()
             }
@@ -99,16 +99,16 @@ extension Jukebox {
     public func replay(){
         guard playerOperational else {return}
         stopProgressTimer()
-        seekToSecond(0)
-        playAtIndex(0)
+        seek(toSecond: 0)
+        play(atIndex: 0)
     }
     
     /**
      Plays the next item in the queue.
      */
     public func playNext() {
-        guard playerOperational else {return;}
-        playAtIndex(playIndex  + 1)
+        guard playerOperational else {return}
+        play(atIndex: playIndex + 1)
     }
     
     /**
@@ -116,7 +116,7 @@ extension Jukebox {
      */
     public func playPrevious() {
         guard playerOperational else {return}
-        playAtIndex(playIndex - 1)
+        play(atIndex: playIndex - 1)
     }
     
     /**
@@ -124,7 +124,7 @@ extension Jukebox {
      */
     public func replayCurrentItem() {
         guard playerOperational else {return}
-        seekToSecond(0, shouldPlay: true)
+        seek(toSecond: 0, shouldPlay: true)
     }
     
     /**
@@ -133,7 +133,7 @@ extension Jukebox {
      - parameter second: the second to seek to
      - parameter shouldPlay: pass true if playback should be resumed after seeking
      */
-    public func seekToSecond(second : Int, shouldPlay: Bool = false) {
+    public func seek(toSecond second: Int, shouldPlay: Bool = false) {
         guard let player = player, let item = currentItem else {return}
         
         player.seekToTime(CMTimeMake(Int64(second), 1))
@@ -153,7 +153,7 @@ extension Jukebox {
      - parameter item:            the item to be appended to the play queue
      - parameter loadingAssets:   pass true to load item's assets asynchronously
      */
-    public func appendItem(item : JukeboxItem, loadingAssets : Bool) {
+    public func append(item item: JukeboxItem, loadingAssets: Bool) {
         queuedItems.append(item)
         item.delegate = self
         if loadingAssets {
@@ -166,7 +166,7 @@ extension Jukebox {
     
     - parameter item: item to be removed
     */
-    public func removeItem(item : JukeboxItem) {
+    public func remove(item item: JukeboxItem) {
         if let index = queuedItems.indexOf({$0.identifier == item.identifier}) {
             queuedItems.removeAtIndex(index)
         }
@@ -188,9 +188,9 @@ extension Jukebox {
 
 // MARK: - Class implementation -
 
-public class Jukebox : UIResponder, JukeboxItemDelegate {
+public class Jukebox: NSObject, JukeboxItemDelegate {
     
-    public enum State : Int, CustomStringConvertible {
+    public enum State: Int, CustomStringConvertible {
         case Ready = 0
         case Playing
         case Paused
@@ -222,7 +222,7 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
     private var player                       :   AVPlayer?
     private var progressObserver             :   AnyObject!
     private var backgroundIdentifier         =   UIBackgroundTaskInvalid
-    private var delegate                     :   JukeboxDelegate?
+    private(set) public weak var delegate    :   JukeboxDelegate?
     
     private (set) public var playIndex       =   0
     private (set) public var queuedItems     :   [JukeboxItem]!
@@ -233,7 +233,7 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
     }
     // MARK:  Computed
     
-    public var volume : Float{
+    public var volume: Float{
         get {
             return player?.volume ?? 0
         }
@@ -242,14 +242,14 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
         }
     }
     
-    public var currentItem : JukeboxItem? {
+    public var currentItem: JukeboxItem? {
         guard playIndex >= 0 && playIndex < queuedItems.count else {
             return nil
         }
         return queuedItems[playIndex]
     }
     
-    private var playerOperational : Bool {
+    private var playerOperational: Bool {
         return player != nil && currentItem != nil
     }
     
@@ -263,7 +263,7 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
     
     - returns: Jukebox instance
     */
-    public required init (delegate : JukeboxDelegate? = nil, items : [JukeboxItem] = [JukeboxItem]()) {
+    public required init(delegate: JukeboxDelegate? = nil, items: [JukeboxItem] = [JukeboxItem]()) {
         self.delegate = delegate
         super.init()
         assignQueuedItems(items)
@@ -331,10 +331,10 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
         MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = nowPlayingInfo
     }
     
-    private func playCurrentItemWithAsset(asset : AVAsset) {
-        queuedItems[playIndex].refreshPlayerItem(asset)
+    private func playCurrentItem(withAsset asset: AVAsset) {
+        queuedItems[playIndex].refreshPlayerItem(withAsset: asset)
         startNewPlayer(forItem: queuedItems[playIndex].playerItem!)
-        guard let playItem = queuedItems[playIndex].playerItem else {return;}
+        guard let playItem = queuedItems[playIndex].playerItem else {return}
         registerForPlayToEndNotification(withItem: playItem)
     }
     
@@ -344,14 +344,14 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
             if let player = player {
                 player.play()
             } else {
-                currentItem!.refreshPlayerItem(currentItem!.playerItem!.asset)
+                currentItem!.refreshPlayerItem(withAsset: currentItem!.playerItem!.asset)
                 startNewPlayer(forItem: currentItem!.playerItem!)
             }
             state = .Playing
         }
     }
     
-    private func invalidatePlayback(resetIndex resetIndex : Bool = true) {
+    private func invalidatePlayback(shouldResetIndex resetIndex: Bool = true) {
         stopProgressTimer()
         player?.pause()
         player = nil
@@ -362,17 +362,17 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
     }
     
     private func startNewPlayer(forItem item : AVPlayerItem) {
-        invalidatePlayback(resetIndex: false)
+        invalidatePlayback(shouldResetIndex: false)
         player = AVPlayer(playerItem: item)
         player?.allowsExternalPlayback = false
         startProgressTimer()
-        seekToSecond(0, shouldPlay: true)
+        seek(toSecond: 0, shouldPlay: true)
         updateInfoCenter()
     }
     
     // MARK: Items related
     
-    private func assignQueuedItems (items : [JukeboxItem]) {
+    private func assignQueuedItems (items: [JukeboxItem]) {
         queuedItems = items
         for item in queuedItems {
             item.delegate = self
@@ -452,7 +452,7 @@ public class Jukebox : UIResponder, JukeboxItemDelegate {
         if playIndex >= queuedItems.count - 1 {
             stop()
         } else {
-            playAtIndex(playIndex + 1)
+            play(atIndex: playIndex + 1)
         }
     }
     

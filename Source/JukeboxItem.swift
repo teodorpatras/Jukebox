@@ -51,6 +51,7 @@ public class JukeboxItem: NSObject {
     private (set) public var artwork     :   UIImage?
     
     private var timer: NSTimer?
+    private let observedValue = "timedMetadata"
     
     // MARK:- Initializer -
     
@@ -72,8 +73,7 @@ public class JukeboxItem: NSObject {
     
     override public func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         
-        if keyPath == "timedMetadata" {
-            
+        if keyPath == observedValue {
             if let item = playerItem where item === object {
                 guard let metadata = item.timedMetadata else { return }
                 for item in metadata {
@@ -85,15 +85,15 @@ public class JukeboxItem: NSObject {
     }
     
     deinit {
-        playerItem?.removeObserver(self, forKeyPath: "timedMetadata")
+        playerItem?.removeObserver(self, forKeyPath: observedValue)
     }
     
     // MARK: - Internal methods -
     
-    func loadPlayerItem () {
+    func loadPlayerItem() {
         
         if let item = playerItem {
-            refreshPlayerItem(item.asset)
+            refreshPlayerItem(withAsset: item.asset)
             delegate?.jukeboxItemDidLoadPlayerItem(self)
             return
         } else if didLoad {
@@ -103,16 +103,19 @@ public class JukeboxItem: NSObject {
         }
         
         loadAsync { (asset) -> () in
-            self.validateAsset(asset)
-            self.refreshPlayerItem(asset)
-            self.delegate?.jukeboxItemDidLoadPlayerItem(self)
+            if self.validateAsset(asset) {
+                self.refreshPlayerItem(withAsset: asset)
+                self.delegate?.jukeboxItemDidLoadPlayerItem(self)
+            } else {
+                self.didLoad = false
+            }
         }
     }
     
-    func refreshPlayerItem(asset : AVAsset) {
-        playerItem?.removeObserver(self, forKeyPath: "timedMetadata")
+    func refreshPlayerItem(withAsset asset: AVAsset) {
+        playerItem?.removeObserver(self, forKeyPath: observedValue)
         playerItem = AVPlayerItem(asset: asset)
-        playerItem?.addObserver(self, forKeyPath: "timedMetadata", options: NSKeyValueObservingOptions.New, context: nil)
+        playerItem?.addObserver(self, forKeyPath: observedValue, options: NSKeyValueObservingOptions.New, context: nil)
         update()
     }
     
@@ -129,18 +132,18 @@ public class JukeboxItem: NSObject {
     
     // MARK:- Private methods -
     
-    private func validateAsset(asset : AVURLAsset) {
-        var e : NSError?
+    private func validateAsset(asset : AVURLAsset) -> Bool {
+        var e: NSError?
         asset.statusOfValueForKey("duration", error: &e)
         if let error = e {
             var message = "\n\n***** Jukebox fatal error*****\n\n"
             if error.code == -1022 {
                 message += "It looks like you're using Xcode 7 and due to an App Transport Security issue (absence of SSL-based HTTP) the asset cannot be loaded from the specified URL: \"\(URL)\".\nTo fix this issue, append the following to your .plist file:\n\n<key>NSAppTransportSecurity</key>\n<dict>\n\t<key>NSAllowsArbitraryLoads</key>\n\t<true/>\n</dict>\n\n"
                 fatalError(message)
-            } else {
-                fatalError("\(message)\(error.description)\n\n")
             }
+            return false
         }
+        return true
     }
     
     private func scheduleNotification() {
@@ -155,7 +158,7 @@ public class JukeboxItem: NSObject {
         self.delegate?.jukeboxItemDidUpdate(self)
     }
     
-    private func loadAsync(completion : (asset : AVURLAsset) -> ()) {
+    private func loadAsync(completion: (asset: AVURLAsset) -> ()) {
         let asset = AVURLAsset(URL: URL, options: nil)
         
         asset.loadValuesAsynchronouslyForKeys(["duration"], completionHandler: { () -> Void in
@@ -192,14 +195,14 @@ public class JukeboxItem: NSObject {
         case "artist"? :
             artist = item.value as? String
         case "artwork"? :
-            processArtwork(forMetadataItem : item)
+            processArtwork(fromMetadataItem : item)
         default :
             break
         }
     }
     
-    private func processArtwork(forMetadataItem item : AVMetadataItem) {
-        guard let value = item.value else {return;}
+    private func processArtwork(fromMetadataItem item: AVMetadataItem) {
+        guard let value = item.value else {return}
         let copiedValue: AnyObject = value.copyWithZone(nil)
         
         if let dict = copiedValue as? [NSObject : AnyObject] {

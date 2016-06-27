@@ -29,13 +29,13 @@ class ViewController: UIViewController, JukeboxDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        
         // begin receiving remote events
         UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
         
         // configure jukebox
         jukebox = Jukebox(delegate: self, items: [
             JukeboxItem(URL: NSURL(string: "http://soundradio.hk/sound-radio.m3u")!),
-            JukeboxItem(URL: NSURL(string: "http://www.stephaniequinn.com/Music/Commercial%20DEMO%20-%2005.mp3")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
             ])
@@ -43,7 +43,7 @@ class ViewController: UIViewController, JukeboxDelegate {
         /// Later add another item
         let delay = dispatch_time(DISPATCH_TIME_NOW, Int64(3 * Double(NSEC_PER_SEC)))
         dispatch_after(delay, dispatch_get_main_queue()) {
-            self.jukebox.appendItem(JukeboxItem (URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!), loadingAssets: true)
+            self.jukebox.append(item: JukeboxItem (URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!), loadingAssets: true)
         }
     }
     
@@ -135,8 +135,6 @@ class ViewController: UIViewController, JukeboxDelegate {
             default:
                 break
             }
-        } else {
-            print("NO EVENT!!!")
         }
     }
     
@@ -150,7 +148,7 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     @IBAction func progressSliderValueChanged() {
         if let duration = jukebox.currentItem?.duration {
-            jukebox.seekToSecond(Int(Double(slider.value) * duration))
+            jukebox.seek(toSecond: Int(Double(slider.value) * duration))
         }
     }
     
@@ -169,7 +167,7 @@ class ViewController: UIViewController, JukeboxDelegate {
     @IBAction func playPauseAction() {
         switch jukebox.state {
             case .Ready :
-                jukebox.playAtIndex(0)
+                jukebox.play(atIndex: 0)
             case .Playing :
                 jukebox.pause()
             case .Paused :
