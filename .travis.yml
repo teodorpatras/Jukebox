@@ -3,11 +3,20 @@
 # * https://github.com/supermarin/xcpretty#usage
 
 language: objective-c
-# cache: cocoapods
-# podfile: Example/Podfile
-# before_install:
-# - gem install cocoapods # Since Travis is not always on latest version
-# - pod install --project-directory=Example
+osx_image: xcode7.3
+env:
+  global:
+    - WORKSPACE=Jukebox.xcworkspace
+    - FRAMEWORK_NAME=Jukebox
+    - PROJECT=Jukebox.xcodeproj
+    - SCHEME=Jukebox
+    - SDK=iphonesimulator9.3
+install:
+- gem install xcpretty --no-rdoc --no-ri --no-document --quiet
+before_deploy:
+  - carthage build --no-skip-current
+  - carthage archive $FRAMEWORK_NAME
 script:
-- set -o pipefail && xcodebuild test -workspace Example/Jukebox.xcworkspace -scheme Jukebox-Example -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO | xcpretty
-- pod lib lint
+- set -o pipefail
+- xcodebuild test -workspace $WORKSPACE -scheme $SCHEME -sdk $SDK ONLY_ACTIVE_ARCH=NO | xcpretty -c
+- pod lib lint --quick
