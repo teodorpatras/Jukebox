@@ -123,7 +123,7 @@ jukebox = Jukebox(delegate: self, items: [
 jukebox.play()
 ```
 
-##<a name="remote-events"> Handling remove events </a>
+##<a name="remote-events"> Handling remote events </a>
 
 In order to handle remote events, you should do the following:
 
