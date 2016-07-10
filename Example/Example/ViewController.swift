@@ -36,6 +36,7 @@ class ViewController: UIViewController, JukeboxDelegate {
         // configure jukebox
         jukebox = Jukebox(delegate: self, items: [
             JukeboxItem(URL: NSURL(string: "http://soundradio.hk/sound-radio.m3u")!),
+            JukeboxItem(URL: NSURL(string: "http://www.kissfm.ro/listen.pls")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
             ])
@@ -80,7 +81,7 @@ class ViewController: UIViewController, JukeboxDelegate {
     
     func jukeboxPlaybackProgressDidChange(jukebox: Jukebox) {
         
-        if let currentTime = jukebox.currentItem?.currentTime, let duration = jukebox.currentItem?.duration {
+        if let currentTime = jukebox.currentItem?.currentTime, let duration = jukebox.currentItem?.meta.duration {
             let value = Float(currentTime / duration)
             slider.value = value
             populateLabelWithTime(currentTimeLabel, time: currentTime)
@@ -147,7 +148,7 @@ class ViewController: UIViewController, JukeboxDelegate {
     }
     
     @IBAction func progressSliderValueChanged() {
-        if let duration = jukebox.currentItem?.duration {
+        if let duration = jukebox.currentItem?.meta.duration {
             jukebox.seek(toSecond: Int(Double(slider.value) * duration))
         }
     }
