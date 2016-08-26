@@ -35,7 +35,6 @@ class ViewController: UIViewController, JukeboxDelegate {
         
         // configure jukebox
         jukebox = Jukebox(delegate: self, items: [
-            JukeboxItem(URL: NSURL(string: "http://soundradio.hk/sound-radio.m3u")!),
             JukeboxItem(URL: NSURL(string: "http://www.kissfm.ro/listen.pls")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
             JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
