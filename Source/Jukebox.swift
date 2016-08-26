@@ -263,12 +263,19 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     
     - returns: Jukebox instance
     */
-    public required init(delegate: JukeboxDelegate? = nil, items: [JukeboxItem] = [JukeboxItem]()) {
+    public required init?(delegate: JukeboxDelegate? = nil, items: [JukeboxItem] = [JukeboxItem]())  {
         self.delegate = delegate
         super.init()
+        
+        do {
+            try configureAudioSession()
+        } catch {
+            print("[Jukebox - Error] \(error)")
+            return nil
+        }
+        
         assignQueuedItems(items)
         configureObservers()
-        configureAudioSession()
     }
     
     deinit{
@@ -276,6 +283,11 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     }
     
     // MARK:- JukeboxItemDelegate -
+    
+    func jukeboxItemDidFail(item: JukeboxItem) {
+        stop()
+        state = .Failed
+    }
     
     func jukeboxItemDidUpdate(item: JukeboxItem) {
         guard let item = currentItem else {return}
@@ -428,13 +440,9 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         }
     }
     
-    private func configureAudioSession() {
-        do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            fatalError("Could not open the audio session, hence Jukebox is unusable!")
-        }
+    private func configureAudioSession() throws {
+        try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+        try AVAudioSession.sharedInstance().setActive(true)
     }
     
     private func configureObservers() {
