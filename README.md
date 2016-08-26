@@ -8,7 +8,7 @@
 
 Jukebox is an iOS audio player written in Swift.
 
-# Table of Contents
+# Contents
 1. [Features](#features)
 3. [Installation](#installation)
 4. [Supported OS & SDK versions](#supported-versions)
@@ -45,7 +45,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Jukebox', '~> 0.1.2'
+pod 'Jukebox', '~> 0.1.4'
 ```
 
 Then, run the following command:

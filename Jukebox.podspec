@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "Jukebox"
-  s.version          = "0.1.3"
+  s.version          = "0.1.4"
   s.summary          = "Jukebox is an iOS audio player written in Swift."
 
   s.homepage         = "https://github.com/teodorpatras/Jukebox"
