@@ -12,7 +12,7 @@ import XCTest
 class JukeboxTests: JukeboxTestCase {
     
     func testJukeboxIntegrity() {
-        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL), JukeboxItem(URL: secondURL)])
+        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL), JukeboxItem(URL: secondURL)])!
         
         XCTAssertNotNil(jukebox.currentItem)
         XCTAssert(jukebox.state == .Ready)
@@ -20,7 +20,7 @@ class JukeboxTests: JukeboxTestCase {
     }
     
     func testJukeboxDoesNotPlay() {
-        let jukebox = Jukebox()
+        let jukebox = Jukebox()!
         jukebox.append(item: JukeboxItem(URL: self.firstURL), loadingAssets: true)
         
         let expectation = self.expectationWithDescription("Jukebox does not play")
@@ -34,7 +34,7 @@ class JukeboxTests: JukeboxTestCase {
     }
     
     func testJukeboxCurrentItem_playFromFirst() {
-        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])
+        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])!
         jukebox.play()
         
         jukebox.append(item: JukeboxItem(URL: self.secondURL), loadingAssets: false)
@@ -59,7 +59,7 @@ class JukeboxTests: JukeboxTestCase {
     }
     
     func testJukeboxCurrentItem_playFromLast() {
-        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])
+        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])!
         jukebox.append(item: JukeboxItem(URL: secondURL), loadingAssets: true)
         jukebox.play(atIndex: 1)
         

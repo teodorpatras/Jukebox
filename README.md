@@ -45,7 +45,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 
-pod 'Jukebox', '~> 0.1.4'
+pod 'Jukebox', '~> 0.1.5'
 ```
 
 Then, run the following command:
