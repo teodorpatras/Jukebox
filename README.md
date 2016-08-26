@@ -120,7 +120,7 @@ jukebox = Jukebox(delegate: self, items: [
 2) Play and enjoy:
 
 ```swift
-jukebox.play()
+jukebox?.play()
 ```
 
 ##<a name="remote-events"> Handling remote events </a>
