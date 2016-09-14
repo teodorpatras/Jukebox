@@ -11,12 +11,12 @@ import CoreMedia
 
 class JukeboxTestCase: XCTestCase {
 
-    let firstURL = NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!
-    let secondURL = NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!
+    let firstURL = URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!
+    let secondURL = URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!
     
-    func after (time : Double, execute : dispatch_block_t) {
-        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(time * Double(NSEC_PER_SEC)))
-        dispatch_after(delayTime, dispatch_get_main_queue(), execute)
+    func after (_ time : Double, execute : @escaping ()->()) {
+        let delayTime = DispatchTime.now() + Double(Int64(time * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: delayTime, execute: execute)
     }
 
 }

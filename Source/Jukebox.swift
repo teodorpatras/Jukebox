@@ -28,10 +28,10 @@ import MediaPlayer
 // MARK: - Custom types -
 
 public protocol JukeboxDelegate: class {
-    func jukeboxStateDidChange(state : Jukebox)
-    func jukeboxPlaybackProgressDidChange(jukebox : Jukebox)
-    func jukeboxDidLoadItem(jukebox : Jukebox, item : JukeboxItem)
-    func jukeboxDidUpdateMetadata(jukebox : Jukebox, forItem: JukeboxItem)
+    func jukeboxStateDidChange(_ state : Jukebox)
+    func jukeboxPlaybackProgressDidChange(_ jukebox : Jukebox)
+    func jukeboxDidLoadItem(_ jukebox : Jukebox, item : JukeboxItem)
+    func jukeboxDidUpdateMetadata(_ jukebox : Jukebox, forItem: JukeboxItem)
 }
 
 // MARK: - Public methods extension -
@@ -80,7 +80,7 @@ extension Jukebox {
     public func pause() {
         stopProgressTimer()
         player?.pause()
-        state = .Paused
+        state = .paused
     }
     
     /**
@@ -88,8 +88,8 @@ extension Jukebox {
      */
     public func stop() {
         invalidatePlayback()
-        state = .Ready
-        UIApplication.sharedApplication().endBackgroundTask(backgroundIdentifier)
+        state = .ready
+        UIApplication.shared.endBackgroundTask(backgroundIdentifier)
         backgroundIdentifier = UIBackgroundTaskInvalid
     }
     
@@ -136,12 +136,12 @@ extension Jukebox {
     public func seek(toSecond second: Int, shouldPlay: Bool = false) {
         guard let player = player, let item = currentItem else {return}
         
-        player.seekToTime(CMTimeMake(Int64(second), 1))
+        player.seek(to: CMTimeMake(Int64(second), 1))
         item.update()
         if shouldPlay {
             player.play()
-            if state != .Playing {
-                state = .Playing
+            if state != .playing {
+                state = .playing
             }
         }
         delegate?.jukeboxPlaybackProgressDidChange(self)
@@ -153,7 +153,7 @@ extension Jukebox {
      - parameter item:            the item to be appended to the play queue
      - parameter loadingAssets:   pass true to load item's assets asynchronously
      */
-    public func append(item item: JukeboxItem, loadingAssets: Bool) {
+    public func append(item: JukeboxItem, loadingAssets: Bool) {
         queuedItems.append(item)
         item.delegate = self
         if loadingAssets {
@@ -166,9 +166,9 @@ extension Jukebox {
     
     - parameter item: item to be removed
     */
-    public func remove(item item: JukeboxItem) {
-        if let index = queuedItems.indexOf({$0.identifier == item.identifier}) {
-            queuedItems.removeAtIndex(index)
+    public func remove(item: JukeboxItem) {
+        if let index = queuedItems.index(where: {$0.identifier == item.identifier}) {
+            queuedItems.remove(at: index)
         }
     }
     
@@ -177,10 +177,10 @@ extension Jukebox {
      
      - parameter url: the item URL
      */
-    public func removeItems(withURL url : NSURL) {
-        let indexes = queuedItems.indexesOf({$0.URL == url})
+    public func removeItems(withURL url : URL) {
+        let indexes = queuedItems.indexesOf({$0.URL as URL == url})
         for index in indexes {
-            queuedItems.removeAtIndex(index)
+            queuedItems.remove(at: index)
         }
     }
 }
@@ -188,28 +188,28 @@ extension Jukebox {
 
 // MARK: - Class implementation -
 
-public class Jukebox: NSObject, JukeboxItemDelegate {
+open class Jukebox: NSObject, JukeboxItemDelegate {
     
     public enum State: Int, CustomStringConvertible {
-        case Ready = 0
-        case Playing
-        case Paused
-        case Loading
-        case Failed
+        case ready = 0
+        case playing
+        case paused
+        case loading
+        case failed
         
         public var description: String {
             get{
                 switch self
                 {
-                case Ready:
+                case .ready:
                     return "Ready"
-                case Playing:
+                case .playing:
                     return "Playing"
-                case Failed:
+                case .failed:
                     return "Failed"
-                case Paused:
+                case .paused:
                     return "Paused"
-                case Loading:
+                case .loading:
                     return "Loading"
                     
                 }
@@ -219,21 +219,21 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     
     // MARK:- Properties -
     
-    private var player                       :   AVPlayer?
-    private var progressObserver             :   AnyObject!
-    private var backgroundIdentifier         =   UIBackgroundTaskInvalid
-    private(set) public weak var delegate    :   JukeboxDelegate?
+    fileprivate var player                       :   AVPlayer?
+    fileprivate var progressObserver             :   AnyObject!
+    fileprivate var backgroundIdentifier         =   UIBackgroundTaskInvalid
+    fileprivate(set) open weak var delegate    :   JukeboxDelegate?
     
-    private (set) public var playIndex       =   0
-    private (set) public var queuedItems     :   [JukeboxItem]!
-    private (set) public var state           =   State.Ready {
+    fileprivate (set) open var playIndex       =   0
+    fileprivate (set) open var queuedItems     :   [JukeboxItem]!
+    fileprivate (set) open var state           =   State.ready {
         didSet {
             delegate?.jukeboxStateDidChange(self)
         }
     }
     // MARK:  Computed
     
-    public var volume: Float{
+    open var volume: Float{
         get {
             return player?.volume ?? 0
         }
@@ -242,14 +242,14 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         }
     }
     
-    public var currentItem: JukeboxItem? {
+    open var currentItem: JukeboxItem? {
         guard playIndex >= 0 && playIndex < queuedItems.count else {
             return nil
         }
         return queuedItems[playIndex]
     }
     
-    private var playerOperational: Bool {
+    fileprivate var playerOperational: Bool {
         return player != nil && currentItem != nil
     }
     
@@ -279,28 +279,28 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     }
     
     deinit{
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK:- JukeboxItemDelegate -
     
-    func jukeboxItemDidFail(item: JukeboxItem) {
+    func jukeboxItemDidFail(_ item: JukeboxItem) {
         stop()
-        state = .Failed
+        state = .failed
     }
     
-    func jukeboxItemDidUpdate(item: JukeboxItem) {
+    func jukeboxItemDidUpdate(_ item: JukeboxItem) {
         guard let item = currentItem else {return}
         updateInfoCenter()
         self.delegate?.jukeboxDidUpdateMetadata(self, forItem: item)
     }
     
-    func jukeboxItemDidLoadPlayerItem(item: JukeboxItem) {
+    func jukeboxItemDidLoadPlayerItem(_ item: JukeboxItem) {
         delegate?.jukeboxDidLoadItem(self, item: item)
-        let index = queuedItems.indexOf{$0 === item}
+        let index = queuedItems.index{$0 === item}
         
         guard let playItem = item.playerItem
-            where state == .Loading && playIndex == index else {return}
+            , state == .loading && playIndex == index else {return}
         
         registerForPlayToEndNotification(withItem: playItem)
         startNewPlayer(forItem: playItem)
@@ -310,48 +310,48 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     
     // MARK: Playback
     
-    private func updateInfoCenter() {
+    fileprivate func updateInfoCenter() {
         guard let item = currentItem else {return}
         
-        let title = (item.meta.title ?? item.localTitle) ?? item.URL.lastPathComponent!
+        let title = (item.meta.title ?? item.localTitle) ?? item.URL.lastPathComponent
         let currentTime = item.currentTime ?? 0
         let duration = item.meta.duration ?? 0
         let trackNumber = playIndex
         let trackCount = queuedItems.count
         
         var nowPlayingInfo : [String : AnyObject] = [
-            MPMediaItemPropertyPlaybackDuration : duration,
-            MPMediaItemPropertyTitle : title,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime : currentTime,
-            MPNowPlayingInfoPropertyPlaybackQueueCount :trackCount,
-            MPNowPlayingInfoPropertyPlaybackQueueIndex : trackNumber,
-            MPMediaItemPropertyMediaType : MPMediaType.AnyAudio.rawValue
+            MPMediaItemPropertyPlaybackDuration : duration as AnyObject,
+            MPMediaItemPropertyTitle : title as AnyObject,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime : currentTime as AnyObject,
+            MPNowPlayingInfoPropertyPlaybackQueueCount :trackCount as AnyObject,
+            MPNowPlayingInfoPropertyPlaybackQueueIndex : trackNumber as AnyObject,
+            MPMediaItemPropertyMediaType : MPMediaType.anyAudio.rawValue as AnyObject
         ]
         
         if let artist = item.meta.artist {
-            nowPlayingInfo[MPMediaItemPropertyArtist] = artist
+            nowPlayingInfo[MPMediaItemPropertyArtist] = artist as AnyObject?
         }
         
         if let album = item.meta.album {
-            nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = album
+            nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = album as AnyObject?
         }
         
         if let img = currentItem?.meta.artwork {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: img)
         }
         
-        MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = nowPlayingInfo
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
-    private func playCurrentItem(withAsset asset: AVAsset) {
+    fileprivate func playCurrentItem(withAsset asset: AVAsset) {
         queuedItems[playIndex].refreshPlayerItem(withAsset: asset)
         startNewPlayer(forItem: queuedItems[playIndex].playerItem!)
         guard let playItem = queuedItems[playIndex].playerItem else {return}
         registerForPlayToEndNotification(withItem: playItem)
     }
     
-    private func resumePlayback() {
-        if state != .Playing {
+    fileprivate func resumePlayback() {
+        if state != .playing {
             startProgressTimer()
             if let player = player {
                 player.play()
@@ -359,11 +359,11 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
                 currentItem!.refreshPlayerItem(withAsset: currentItem!.playerItem!.asset)
                 startNewPlayer(forItem: currentItem!.playerItem!)
             }
-            state = .Playing
+            state = .playing
         }
     }
     
-    private func invalidatePlayback(shouldResetIndex resetIndex: Bool = true) {
+    fileprivate func invalidatePlayback(shouldResetIndex resetIndex: Bool = true) {
         stopProgressTimer()
         player?.pause()
         player = nil
@@ -373,7 +373,7 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         }
     }
     
-    private func startNewPlayer(forItem item : AVPlayerItem) {
+    fileprivate func startNewPlayer(forItem item : AVPlayerItem) {
         invalidatePlayback(shouldResetIndex: false)
         player = AVPlayer(playerItem: item)
         player?.allowsExternalPlayback = false
@@ -384,14 +384,14 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     
     // MARK: Items related
     
-    private func assignQueuedItems (items: [JukeboxItem]) {
+    fileprivate func assignQueuedItems (_ items: [JukeboxItem]) {
         queuedItems = items
         for item in queuedItems {
             item.delegate = self
         }
     }
     
-    private func loadPlaybackItem() {
+    fileprivate func loadPlaybackItem() {
         guard playIndex >= 0 && playIndex < queuedItems.count else {
             return
         }
@@ -399,10 +399,10 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         stopProgressTimer()
         player?.pause()
         queuedItems[playIndex].loadPlayerItem()
-        state = .Loading
+        state = .loading
     }
     
-    private func preloadNextAndPrevious(atIndex index: Int) {
+    fileprivate func preloadNextAndPrevious(atIndex index: Int) {
         guard !queuedItems.isEmpty else {return}
         
         if index - 1 >= 0 {
@@ -416,14 +416,14 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     
     // MARK: Progress tracking
     
-    private func startProgressTimer(){
-        guard let player = player where player.currentItem?.duration.isValid == true else {return}
-        progressObserver = player.addPeriodicTimeObserverForInterval(CMTimeMakeWithSeconds(0.05, Int32(NSEC_PER_SEC)), queue: nil, usingBlock: { [unowned self] (time : CMTime) -> Void in
+    fileprivate func startProgressTimer(){
+        guard let player = player , player.currentItem?.duration.isValid == true else {return}
+        progressObserver = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.05, Int32(NSEC_PER_SEC)), queue: nil, using: { [unowned self] (time : CMTime) -> Void in
             self.timerAction()
-        })
+        }) as AnyObject!
     }
     
-    private func stopProgressTimer() {
+    fileprivate func stopProgressTimer() {
         guard let player = player, let observer = progressObserver else {
             return
         }
@@ -433,20 +433,20 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
     
     // MARK: Configurations
     
-    private func configureBackgroundAudioTask() {
-        backgroundIdentifier =  UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
-            UIApplication.sharedApplication().endBackgroundTask(self.backgroundIdentifier)
+    fileprivate func configureBackgroundAudioTask() {
+        backgroundIdentifier =  UIApplication.shared.beginBackgroundTask (expirationHandler: { () -> Void in
+            UIApplication.shared.endBackgroundTask(self.backgroundIdentifier)
             self.backgroundIdentifier = UIBackgroundTaskInvalid
-        }
+        })
     }
     
-    private func configureAudioSession() throws {
+    fileprivate func configureAudioSession() throws {
         try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
         try AVAudioSession.sharedInstance().setActive(true)
     }
     
-    private func configureObservers() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(Jukebox.handleStall), name: AVPlayerItemPlaybackStalledNotification, object: nil)
+    fileprivate func configureObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(Jukebox.handleStall), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
     }
     
     // MARK:- Notifications -
@@ -456,7 +456,7 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         player?.play()
     }
     
-    func playerItemDidPlayToEnd(notification : NSNotification){
+    func playerItemDidPlayToEnd(_ notification : Notification){
         if playIndex >= queuedItems.count - 1 {
             stop()
         } else {
@@ -471,19 +471,19 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         delegate?.jukeboxPlaybackProgressDidChange(self)
     }
     
-    private func registerForPlayToEndNotification(withItem item: AVPlayerItem) {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(Jukebox.playerItemDidPlayToEnd(_:)), name: AVPlayerItemDidPlayToEndTimeNotification, object: item)
+    fileprivate func registerForPlayToEndNotification(withItem item: AVPlayerItem) {
+        NotificationCenter.default.addObserver(self, selector: #selector(Jukebox.playerItemDidPlayToEnd(_:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: item)
     }
     
-    private func unregisterForPlayToEndNotification(withItem item : AVPlayerItem) {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: AVPlayerItemDidPlayToEndTimeNotification, object: item)
+    fileprivate func unregisterForPlayToEndNotification(withItem item : AVPlayerItem) {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: item)
     }
 }
 
-private extension CollectionType {
-    func indexesOf(@noescape predicate: (Generator.Element) -> Bool) -> [Int] {
+private extension Collection {
+    func indexesOf(_ predicate: (Iterator.Element) -> Bool) -> [Int] {
         var indexes = [Int]()
-        for (index, item) in enumerate() {
+        for (index, item) in enumerated() {
             if predicate(item){
                 indexes.append(index)
             }
@@ -493,5 +493,5 @@ private extension CollectionType {
 }
 
 private extension CMTime {
-    var isValid : Bool { return (flags.intersect(.Valid)) != [] }
+    var isValid : Bool { return (flags.intersection(.valid)) != [] }
 }
