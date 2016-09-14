@@ -15,22 +15,22 @@ class JukeboxTests: JukeboxTestCase {
         let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL), JukeboxItem(URL: secondURL)])!
         
         XCTAssertNotNil(jukebox.currentItem)
-        XCTAssert(jukebox.state == .Ready)
+        XCTAssert(jukebox.state == .ready)
         XCTAssert(jukebox.queuedItems.count == 2)
     }
     
     func testJukeboxDoesNotPlay() {
-        let jukebox = Jukebox()!
+        let jukebox = Jukebox
         jukebox.append(item: JukeboxItem(URL: self.firstURL), loadingAssets: true)
         
-        let expectation = self.expectationWithDescription("Jukebox does not play")
+        let expectation = self.expectation(description: "Jukebox does not play")
         
         after(3) { () -> Void in
-            XCTAssert(jukebox.state == .Ready, "Jukebox should not auto play after loading item!")
+            XCTAssert(jukebox.state == .ready, "Jukebox should not auto play after loading item!")
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(5, handler: nil)
+        self.waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testJukeboxCurrentItem_playFromFirst() {
@@ -39,7 +39,7 @@ class JukeboxTests: JukeboxTestCase {
         
         jukebox.append(item: JukeboxItem(URL: self.secondURL), loadingAssets: false)
         
-        let expectation = self.expectationWithDescription("Jukebox Plays")
+        let expectation = self.expectation(description: "Jukebox Plays")
         
         after(3) { () -> Void in
             XCTAssertEqual(jukebox.currentItem!.URL, self.firstURL)
@@ -55,7 +55,7 @@ class JukeboxTests: JukeboxTestCase {
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(5, handler: nil)
+        self.waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testJukeboxCurrentItem_playFromLast() {
@@ -63,7 +63,7 @@ class JukeboxTests: JukeboxTestCase {
         jukebox.append(item: JukeboxItem(URL: secondURL), loadingAssets: true)
         jukebox.play(atIndex: 1)
         
-        let expectation = self.expectationWithDescription("Jukebox Plays")
+        let expectation = self.expectation(description: "Jukebox Plays")
         
         after(3) { () -> Void in
             XCTAssertEqual(jukebox.currentItem!.URL, self.secondURL)
@@ -79,6 +79,6 @@ class JukeboxTests: JukeboxTestCase {
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(5, handler: nil)
+        self.waitForExpectations(timeout: 5, handler: nil)
     }
 }
