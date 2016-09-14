@@ -17,7 +17,7 @@ class JukeboxItemTests: JukeboxTestCase {
         
         item.loadPlayerItem()
         
-        let expectation = self.expectationWithDescription("Item loaded")
+        let expectation = self.expectation(description: "Item loaded")
         
         after(5) { () -> Void in
             XCTAssertNotNil(item.playerItem)
@@ -25,7 +25,7 @@ class JukeboxItemTests: JukeboxTestCase {
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(7, handler: nil)
+        self.waitForExpectations(timeout: 7, handler: nil)
     }
     
     func testAssetLoading_redundantCalls() {
@@ -37,7 +37,7 @@ class JukeboxItemTests: JukeboxTestCase {
         item.loadPlayerItem()
         item.loadPlayerItem()
         
-        let expectation = self.expectationWithDescription("Item loaded")
+        let expectation = self.expectation(description: "Item loaded")
         
         after(5) { () -> Void in
             XCTAssertNotNil(item.playerItem)
@@ -45,6 +45,6 @@ class JukeboxItemTests: JukeboxTestCase {
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(7, handler: nil)
+        self.waitForExpectations(timeout: 7, handler: nil)
     }
 }

@@ -26,36 +26,36 @@ import AVFoundation
 import MediaPlayer
 
 protocol JukeboxItemDelegate : class {
-    func jukeboxItemDidLoadPlayerItem(item: JukeboxItem)
-    func jukeboxItemDidUpdate(item: JukeboxItem)
-    func jukeboxItemDidFail(item: JukeboxItem)
+    func jukeboxItemDidLoadPlayerItem(_ item: JukeboxItem)
+    func jukeboxItemDidUpdate(_ item: JukeboxItem)
+    func jukeboxItemDidFail(_ item: JukeboxItem)
 }
 
-public class JukeboxItem: NSObject {
+open class JukeboxItem: NSObject {
     
     public struct Meta {
-        private(set) public var duration: Double?
-        private(set) public var title: String?
-        private(set) public var album: String?
-        private(set) public var artist: String?
-        private(set) public var artwork: UIImage?
+        fileprivate(set) public var duration: Double?
+        fileprivate(set) public var title: String?
+        fileprivate(set) public var album: String?
+        fileprivate(set) public var artist: String?
+        fileprivate(set) public var artwork: UIImage?
     }
     
     // MARK:- Properties -
     
             let identifier: String
             var delegate: JukeboxItemDelegate?
-    private var didLoad = false
-    public  var localTitle: String?
-    public  let URL: NSURL
+    fileprivate var didLoad = false
+    open  var localTitle: String?
+    open  let URL: Foundation.URL
     
-    private(set) public var playerItem: AVPlayerItem?
-    private (set) public var currentTime: Double?
-    private(set) public lazy var meta = Meta()
+    fileprivate(set) open var playerItem: AVPlayerItem?
+    fileprivate (set) open var currentTime: Double?
+    fileprivate(set) open lazy var meta = Meta()
 
     
-    private var timer: NSTimer?
-    private let observedValue = "timedMetadata"
+    fileprivate var timer: Timer?
+    fileprivate let observedValue = "timedMetadata"
     
     // MARK:- Initializer -
     
@@ -67,23 +67,23 @@ public class JukeboxItem: NSObject {
     
     - returns: JukeboxItem instance
     */
-    public required init(URL : NSURL, localTitle : String? = nil) {
+    public required init(URL : Foundation.URL, localTitle : String? = nil) {
         self.URL = URL
-        self.identifier = NSUUID().UUIDString
+        self.identifier = UUID().uuidString
         self.localTitle = localTitle
         super.init()
         configureMetadata()
     }
     
-    override public func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
-        if change?["new"] is NSNull {
+        if change?[NSKeyValueChangeKey(rawValue: "new")] is NSNull {
             delegate?.jukeboxItemDidFail(self)
             return
         }
         
         if keyPath == observedValue {
-            if let item = playerItem where item === object {
+            if let item = playerItem, item === object as? AVPlayerItem {
                 guard let metadata = item.timedMetadata else { return }
                 for item in metadata {
                     meta.process(metaItem: item)
@@ -124,7 +124,7 @@ public class JukeboxItem: NSObject {
     func refreshPlayerItem(withAsset asset: AVAsset) {
         playerItem?.removeObserver(self, forKeyPath: observedValue)
         playerItem = AVPlayerItem(asset: asset)
-        playerItem?.addObserver(self, forKeyPath: observedValue, options: NSKeyValueObservingOptions.New, context: nil)
+        playerItem?.addObserver(self, forKeyPath: observedValue, options: NSKeyValueObservingOptions.new, context: nil)
         update()
     }
     
@@ -135,15 +135,15 @@ public class JukeboxItem: NSObject {
         }
     }
     
-    public override var description: String {
+    open override var description: String {
         return "<JukeboxItem:\ntitle: \(meta.title)\nalbum: \(meta.album)\nartist:\(meta.artist)\nduration : \(meta.duration),\ncurrentTime : \(currentTime)\nURL: \(URL)>"
     }
     
     // MARK:- Private methods -
     
-    private func validateAsset(asset : AVURLAsset) -> Bool {
+    fileprivate func validateAsset(_ asset : AVURLAsset) -> Bool {
         var e: NSError?
-        asset.statusOfValueForKey("duration", error: &e)
+        asset.statusOfValue(forKey: "duration", error: &e)
         if let error = e {
             var message = "\n\n***** Jukebox fatal error*****\n\n"
             if error.code == -1022 {
@@ -155,10 +155,10 @@ public class JukeboxItem: NSObject {
         return true
     }
     
-    private func scheduleNotification() {
+    fileprivate func scheduleNotification() {
         timer?.invalidate()
         timer = nil
-        timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
+        timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
     }
     
     func notifyDelegate() {
@@ -167,26 +167,26 @@ public class JukeboxItem: NSObject {
         self.delegate?.jukeboxItemDidUpdate(self)
     }
     
-    private func loadAsync(completion: (asset: AVURLAsset) -> ()) {
-        let asset = AVURLAsset(URL: URL, options: nil)
+    fileprivate func loadAsync(_ completion: @escaping (_ asset: AVURLAsset) -> ()) {
+        let asset = AVURLAsset(url: URL, options: nil)
         
-        asset.loadValuesAsynchronouslyForKeys(["duration"], completionHandler: { () -> Void in
-            dispatch_async(dispatch_get_main_queue()) {
-                completion(asset: asset)
+        asset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: { () -> Void in
+            DispatchQueue.main.async {
+                completion(asset)
             }
         })
     }
     
-    private func configureMetadata()
+    fileprivate func configureMetadata()
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            let metadataArray = AVPlayerItem(URL: self.URL).asset.commonMetadata
+        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async {
+            let metadataArray = AVPlayerItem(url: self.URL).asset.commonMetadata
             
             for item in metadataArray
             {
-                item.loadValuesAsynchronouslyForKeys([AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
+                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
                     self.meta.process(metaItem: item)
-                    dispatch_async(dispatch_get_main_queue(), {
+                    DispatchQueue.main.async(execute: {
                         self.scheduleNotification()
                     })
                 })
@@ -215,14 +215,14 @@ private extension JukeboxItem.Meta {
     
     mutating func processArtwork(fromMetadataItem item: AVMetadataItem) {
         guard let value = item.value else { return }
-        let copiedValue: AnyObject = value.copyWithZone(nil)
+        let copiedValue: AnyObject = value.copy(with: nil) as AnyObject
         
-        if let dict = copiedValue as? [NSObject : AnyObject] {
+        if let dict = copiedValue as? [AnyHashable: Any] {
             //AVMetadataKeySpaceID3
-            if let imageData = dict["data"] as? NSData {
+            if let imageData = dict["data"] as? Data {
                 artwork = UIImage(data: imageData)
             }
-        } else if let data = copiedValue as? NSData{
+        } else if let data = copiedValue as? Data{
             //AVMetadataKeySpaceiTunes
             artwork = UIImage(data: data)
         }
