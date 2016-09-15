@@ -134,17 +134,17 @@ extension Jukebox {
      - parameter shouldPlay: pass true if playback should be resumed after seeking
      */
     public func seek(toSecond second: Int, shouldPlay: Bool = false) {
-        guard let player = player, let item = currentItem else {return}
-        
-        player.seekToTime(CMTimeMake(Int64(second), 1))
-        item.update()
-        if shouldPlay {
-            player.play()
-            if state != .Playing {
-                state = .Playing
-            }
-        }
-        delegate?.jukeboxPlaybackProgressDidChange(self)
+        seekCurrentItem(toMillisecond: second * 1000, shouldPlay: shouldPlay)
+    }
+    
+    /**
+     Seeks to a certain millisecond within the current AVPlayerItem and starts playing
+     
+     - parameter millisecond: the millisecond to seek to
+     - parameter shouldPlay: pass true if playback should be resumed after seeking
+     */
+    public func seek(toMillisecond millisecond: Int, shouldPlay: Bool = false) {
+        seekCurrentItem(toMillisecond: millisecond, shouldPlay: shouldPlay)
     }
     
     /**
@@ -380,6 +380,20 @@ public class Jukebox: NSObject, JukeboxItemDelegate {
         startProgressTimer()
         seek(toSecond: 0, shouldPlay: true)
         updateInfoCenter()
+    }
+    
+    private func seekCurrentItem(toMillisecond millisecond: Int, shouldPlay: Bool) {
+        guard let player = player, let item = currentItem else {return}
+        
+        player.seekToTime(CMTimeMake(Int64(millisecond), 1000))
+        item.update()
+        if shouldPlay {
+            player.play()
+            if state != .Playing {
+                state = .Playing
+            }
+        }
+        delegate?.jukeboxPlaybackProgressDidChange(self)
     }
     
     // MARK: Items related
