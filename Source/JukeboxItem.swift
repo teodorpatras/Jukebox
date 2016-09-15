@@ -34,10 +34,19 @@ protocol JukeboxItemDelegate : class {
 public class JukeboxItem: NSObject {
     
     public struct Meta {
+        /// The duration of the item in seconds.
         private(set) public var duration: Double?
+        
+        /// The title of the item.
         private(set) public var title: String?
+        
+        /// The album the item belongs to.
         private(set) public var album: String?
+        
+        /// The artist of the item.
         private(set) public var artist: String?
+        
+        /// The artwork of the item.
         private(set) public var artwork: UIImage?
     }
     
