@@ -13,23 +13,23 @@ import CoreMedia
 class JukeboxItemTests: JukeboxTestCase {
     
     func testAssetLoading() {
-        let item = JukeboxItem(URL: self.firstURL)
+        let item = JukeboxItem(URL: self.firstURL as URL)
         
         item.loadPlayerItem()
         
-        let expectation = self.expectationWithDescription("Item loaded")
+        let expectation = self.expectation(description: "Item loaded")
         
-        after(5) { () -> Void in
+        after(time: 5) { () -> Void in
             XCTAssertNotNil(item.playerItem)
             XCTAssert(CMTimeGetSeconds(item.playerItem!.asset.duration) > 0)
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(7, handler: nil)
+        self.waitForExpectations(timeout: 7, handler: nil)
     }
     
     func testAssetLoading_redundantCalls() {
-        let item = JukeboxItem(URL: self.secondURL)
+        let item = JukeboxItem(URL: self.secondURL as URL)
         
         item.loadPlayerItem()
         // redundant calls
@@ -37,14 +37,14 @@ class JukeboxItemTests: JukeboxTestCase {
         item.loadPlayerItem()
         item.loadPlayerItem()
         
-        let expectation = self.expectationWithDescription("Item loaded")
+        let expectation = self.expectation(description: "Item loaded")
         
-        after(5) { () -> Void in
+        after(time: 5) { () -> Void in
             XCTAssertNotNil(item.playerItem)
             XCTAssert(CMTimeGetSeconds(item.playerItem!.asset.duration) > 0)
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(7, handler: nil)
+        self.waitForExpectations(timeout: 7, handler: nil)
     }
 }

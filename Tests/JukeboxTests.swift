@@ -12,73 +12,73 @@ import XCTest
 class JukeboxTests: JukeboxTestCase {
     
     func testJukeboxIntegrity() {
-        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL), JukeboxItem(URL: secondURL)])!
+        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL as URL), JukeboxItem(URL: secondURL as URL)])!
         
         XCTAssertNotNil(jukebox.currentItem)
-        XCTAssert(jukebox.state == .Ready)
+        XCTAssert(jukebox.state == .ready)
         XCTAssert(jukebox.queuedItems.count == 2)
     }
     
     func testJukeboxDoesNotPlay() {
         let jukebox = Jukebox()!
-        jukebox.append(item: JukeboxItem(URL: self.firstURL), loadingAssets: true)
+        jukebox.append(item: JukeboxItem(URL: self.firstURL as URL), loadingAssets: true)
         
-        let expectation = self.expectationWithDescription("Jukebox does not play")
+        let expectation = self.expectation(description: "Jukebox does not play")
         
-        after(3) { () -> Void in
-            XCTAssert(jukebox.state == .Ready, "Jukebox should not auto play after loading item!")
+        after(time: 3) { () -> Void in
+            XCTAssert(jukebox.state == .ready, "Jukebox should not auto play after loading item!")
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(5, handler: nil)
+        self.waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testJukeboxCurrentItem_playFromFirst() {
-        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])!
+        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL as URL)])!
         jukebox.play()
         
-        jukebox.append(item: JukeboxItem(URL: self.secondURL), loadingAssets: false)
+        jukebox.append(item: JukeboxItem(URL: self.secondURL as URL), loadingAssets: false)
         
-        let expectation = self.expectationWithDescription("Jukebox Plays")
+        let expectation = self.expectation(description: "Jukebox Plays")
         
-        after(3) { () -> Void in
-            XCTAssertEqual(jukebox.currentItem!.URL, self.firstURL)
+        after(time: 3) { () -> Void in
+            XCTAssertEqual(jukebox.currentItem!.URL, self.firstURL as URL)
             XCTAssert(jukebox.queuedItems.count == 2)
             
             for _ in 1...2 {
                 jukebox.playNext()
                 
                 XCTAssertNotNil(jukebox.currentItem)
-                XCTAssertEqual(jukebox.currentItem!.URL, self.secondURL, "Next item should always be \(self.secondURL), no matter how many times playNext() is called!")
+                XCTAssertEqual(jukebox.currentItem!.URL, self.secondURL as URL, "Next item should always be \(self.secondURL), no matter how many times playNext() is called!")
             }
             
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(5, handler: nil)
+        self.waitForExpectations(timeout: 5, handler: nil)
     }
     
     func testJukeboxCurrentItem_playFromLast() {
-        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL)])!
-        jukebox.append(item: JukeboxItem(URL: secondURL), loadingAssets: true)
+        let jukebox = Jukebox(delegate: nil, items: [JukeboxItem(URL: firstURL as URL)])!
+        jukebox.append(item: JukeboxItem(URL: (secondURL as NSURL) as URL), loadingAssets: true)
         jukebox.play(atIndex: 1)
         
-        let expectation = self.expectationWithDescription("Jukebox Plays")
+        let expectation = self.expectation(description: "Jukebox Plays")
         
-        after(3) { () -> Void in
-            XCTAssertEqual(jukebox.currentItem!.URL, self.secondURL)
+        after(time: 3) { () -> Void in
+            XCTAssertEqual(jukebox.currentItem!.URL, self.secondURL as URL)
             XCTAssert(jukebox.queuedItems.count == 2)
             
             for _ in 1...2 {
                 jukebox.playPrevious()
                 
                 XCTAssertNotNil(jukebox.currentItem)
-                XCTAssertEqual(jukebox.currentItem!.URL, self.firstURL,"Next item should always be \(self.firstURL), no matter how many times playNext() is called!")
+                XCTAssertEqual(jukebox.currentItem!.URL, self.firstURL as URL,"Next item should always be \(self.firstURL), no matter how many times playNext() is called!")
             }
             
             expectation.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(5, handler: nil)
+        self.waitForExpectations(timeout: 5, handler: nil)
     }
 }
