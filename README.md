@@ -109,14 +109,37 @@ If you prefer not to use either of the aforementioned dependency managers, you c
 
 ### Getting started
 
-1) Create an instance of ``Jukebox``:
+1) Import ``Jukebox`` using `` import Jukebox``, inherit in your class from ``JukeboxDelegate``, set the delegate of the player and then add items to it. Example as follows :
 
 ```swift
-// configure jukebox
-jukebox = Jukebox(delegate: self, items: [
-    JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
-    JukeboxItem(URL: NSURL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
-    ])
+class ExampleViewController: UIViewController, JukeboxDelegate{
+override func viewDidLoad() {
+        jukebox = Jukebox(delegate: self)
+        play()
+   }
+func jukeboxStateDidChange(state: Jukebox) {
+      
+    }
+    
+    func jukeboxPlaybackProgressDidChange(jukebox: Jukebox) {
+        
+    }
+    
+    func jukeboxDidLoadItem(jukebox: Jukebox, item: JukeboxItem) {
+        
+    }
+    
+    func jukeboxDidUpdateMetadata(jukebox: Jukebox, forItem: JukeboxItem) {
+        
+    }
+
+  
+func play() {
+     jukebox.setIT([JukeboxItem(URL: NSURL(string: "http://exampleurl")!)])
+     jukebox.play()
+ }
+
+}
 ```
 
 2) Play and enjoy:
