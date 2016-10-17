@@ -183,6 +183,15 @@ extension Jukebox {
             queuedItems.remove(at: index)
         }
     }
+    
+    /**
+    Removes all items from the play queue.
+ 
+     */
+    public func removeAllItems(){
+        queuedItems.removeAll(keepingCapacity: true)
+    }
+    
 }
 
 
@@ -442,34 +451,14 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     
     fileprivate func configureAudioSession() throws {
         try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-        try AVAudioSession.sharedInstance().setMode(AVAudioSessionModeDefault)
         try AVAudioSession.sharedInstance().setActive(true)
     }
     
     fileprivate func configureObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(Jukebox.handleStall), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionInterruption), name: NSNotification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
     }
     
     // MARK:- Notifications -
-    
-    func handleAudioSessionInterruption(_ notification : Notification) {
-        guard let userInfo = notification.userInfo as? [String: AnyObject] else { return }
-        guard let rawInterruptionType = userInfo[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
-        guard let interruptionType = AVAudioSessionInterruptionType(rawValue: rawInterruptionType.uintValue) else { return }
-
-        switch interruptionType {
-        case .began: //interruption started
-            self.pause()
-        case .ended: //interruption ended
-            if let rawInterruptionOption = userInfo[AVAudioSessionInterruptionOptionKey] as? NSNumber {
-                let interruptionOption = AVAudioSessionInterruptionOptions(rawValue: rawInterruptionOption.uintValue)
-                if interruptionOption == AVAudioSessionInterruptionOptions.shouldResume {
-                    self.resumePlayback()
-                }
-            }
-        }
-    }
     
     func handleStall() {
         player?.pause()
