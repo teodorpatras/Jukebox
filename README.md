@@ -43,7 +43,7 @@ $ gem install cocoapods
 To integrate ``Jukebox`` into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ```ruby
-pod 'Jukebox', '~> 0.2.0'
+pod 'Jukebox'
 ```
 
 Then, run the following command:
