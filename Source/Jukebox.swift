@@ -28,7 +28,7 @@ import MediaPlayer
 // MARK: - Custom types -
 
 public protocol JukeboxDelegate: class {
-    func jukeboxStateDidChange(_ state : Jukebox)
+    func jukeboxStateDidChange(_ jukebox : Jukebox)
     func jukeboxPlaybackProgressDidChange(_ jukebox : Jukebox)
     func jukeboxDidLoadItem(_ jukebox : Jukebox, item : JukeboxItem)
     func jukeboxDidUpdateMetadata(_ jukebox : Jukebox, forItem: JukeboxItem)
