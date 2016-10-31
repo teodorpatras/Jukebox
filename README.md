@@ -16,7 +16,7 @@ Jukebox is an iOS audio player written in Swift.
 5. [Usage](#usage)
 6. [Handling remote events](#remote-events)
 7. [Public interface](#public-interface)
-8. [Delegation] (#delegation)
+8. [Delegation](#delegation)
 9. [License](#license)
 10. [Contact](#contact)
 
