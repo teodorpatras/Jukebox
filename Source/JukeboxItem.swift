@@ -31,6 +31,43 @@ protocol JukeboxItemDelegate : class {
     func jukeboxItemDidFail(_ item: JukeboxItem)
 }
 
+public class JukeboxItemMetaBuilder: Any {
+    
+    /// The title of the item.
+    public var title: String?
+    /// The album title of the item.
+    public var album: String?
+    /// The artist tile of the item.
+    public var artist: String?
+    /// The artwork for the item.
+    public var artwork: UIImage?
+    
+    public typealias JukeboxItemMetaBuilderClosure = (JukeboxItemMetaBuilder) -> ()
+    
+    public init(_ builderClosure: JukeboxItemMetaBuilderClosure) {
+        builderClosure(self)
+    }
+    
+    /// Whether the metadata builder has a specific AVMetadataItem value
+    ///
+    /// - Parameter metadataItem: The item to check for.
+    /// - Returns: Whether the metadata exists.
+    fileprivate func hasMetadataItem(_ metadataItem: AVMetadataItem) -> Bool {
+        switch metadataItem.commonKey {
+        case "title"? :
+            return self.title != nil
+        case "albumName"? :
+            return self.album != nil
+        case "artist"? :
+            return self.artist != nil
+        case "artwork"? :
+            return self.artwork != nil
+        default :
+            return false
+        }
+    }
+}
+
 open class JukeboxItem: NSObject {
     
     public struct Meta {
@@ -43,16 +80,25 @@ open class JukeboxItem: NSObject {
     
     // MARK:- Properties -
     
-            let identifier: String
-            var delegate: JukeboxItemDelegate?
+    let identifier: String
     fileprivate var didLoad = false
+    
+    var delegate: JukeboxItemDelegate?
+    
     open  var localTitle: String?
     open  let URL: Foundation.URL
     
     fileprivate(set) open var playerItem: AVPlayerItem?
     fileprivate (set) open var currentTime: Double?
+    
     fileprivate(set) open lazy var meta = Meta()
-
+    
+    /// Builder to supply custom metadata for item.
+    public var customMetaBuilder: JukeboxItemMetaBuilder? {
+        didSet {
+            self.configureMetadata()
+        }
+    }
     
     fileprivate var timer: Timer?
     fileprivate let observedValue = "timedMetadata"
@@ -73,10 +119,11 @@ open class JukeboxItem: NSObject {
         self.localTitle = localTitle
         super.init()
         configureMetadata()
+        
     }
     
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-
+        
         if change?[NSKeyValueChangeKey(rawValue:"name")] is NSNull {
             delegate?.jukeboxItemDidFail(self)
             return
@@ -86,7 +133,9 @@ open class JukeboxItem: NSObject {
             if let item = playerItem , item === object as? AVPlayerItem {
                 guard let metadata = item.timedMetadata else { return }
                 for item in metadata {
-                    meta.process(metaItem: item)
+                    if self.customMetaBuilder?.hasMetadataItem(item) != true { // custom meta takes precedence
+                        meta.process(metaItem: item)
+                    }
                 }
             }
             scheduleNotification()
@@ -177,10 +226,14 @@ open class JukeboxItem: NSObject {
         })
     }
     
-    fileprivate func configureMetadata()
-    {
+    fileprivate func configureMetadata() {
         
-       DispatchQueue.global(qos: .background).async {
+        // process custom metadata first 
+        if let customMetaBuilder = self.customMetaBuilder {
+            self.meta.processBuilder(customMetaBuilder)
+        }
+        
+        DispatchQueue.global(qos: .background).async {
             let metadataArray = AVPlayerItem(url: self.URL).asset.commonMetadata
             
             for item in metadataArray
@@ -211,6 +264,21 @@ private extension JukeboxItem.Meta {
             processArtwork(fromMetadataItem : item)
         default :
             break
+        }
+    }
+    
+    mutating func processBuilder(_ metaBuilder: JukeboxItemMetaBuilder) {
+        if let builderTitle = metaBuilder.title {
+            title = builderTitle
+        }
+        if let builderAlbum = metaBuilder.album {
+            album = builderAlbum
+        }
+        if let builderArtist = metaBuilder.artist {
+            artist = builderArtist
+        }
+        if let builderArtwork = metaBuilder.artwork {
+            artwork = builderArtwork
         }
     }
     
