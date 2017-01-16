@@ -253,6 +253,20 @@ public protocol JukeboxDelegate: class {
 }
 ```
 
+##<a name="metadata"> Metadata </a>
+
+Custom metadata can be defined for a `JukeboxItem` via a `JukeboxItemMetaBuilder`. Simple set the `customMetaBuilder` property on the item:
+
+```
+let item = JukeboxItem(URL: URL(string: "http://www.kissfm.ro/listen.pls")!)
+item.customMetaBuilder = JukeboxItemMetaBuilder({ (builder) in
+	builder.artist = "Custom Artist"
+	builder.artwork = UIImage(named: "CustomArtwork.png")
+})
+
+```
+Custom metadata takes precedence over any available data within the playable `AVPlayerItem`, however a combination of the two is used where available.
+
 ##<a name="license"> License </a>
 
 ```Jukebox``` is released under the MIT license. See the ```LICENSE``` file for details.
