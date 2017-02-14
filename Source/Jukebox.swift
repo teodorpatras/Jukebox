@@ -457,7 +457,8 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         guard let userInfo = notification.userInfo as? [String: AnyObject] else { return }
         guard let rawInterruptionType = userInfo[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
         guard let interruptionType = AVAudioSessionInterruptionType(rawValue: rawInterruptionType.uintValue) else { return }
-
+        guard self.currentItem != nil else { return } // ignore if we are not currently playing
+        
         switch interruptionType {
         case .began: //interruption started
             self.pause()
