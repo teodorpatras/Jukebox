@@ -31,52 +31,7 @@ protocol JukeboxItemDelegate : class {
     func jukeboxItemDidFail(_ item: JukeboxItem)
 }
 
-public class JukeboxItemMetaBuilder: Any {
-    
-    /// The title of the item.
-    public var title: String?
-    /// The album title of the item.
-    public var album: String?
-    /// The artist tile of the item.
-    public var artist: String?
-    /// The artwork for the item.
-    public var artwork: UIImage?
-    
-    public typealias JukeboxItemMetaBuilderClosure = (JukeboxItemMetaBuilder) -> ()
-    
-    public init(_ builderClosure: JukeboxItemMetaBuilderClosure) {
-        builderClosure(self)
-    }
-    
-    /// Whether the metadata builder has a specific AVMetadataItem value
-    ///
-    /// - Parameter metadataItem: The item to check for.
-    /// - Returns: Whether the metadata exists.
-    fileprivate func hasMetadataItem(_ metadataItem: AVMetadataItem) -> Bool {
-        switch metadataItem.commonKey {
-        case "title"? :
-            return self.title != nil
-        case "albumName"? :
-            return self.album != nil
-        case "artist"? :
-            return self.artist != nil
-        case "artwork"? :
-            return self.artwork != nil
-        default :
-            return false
-        }
-    }
-}
-
 open class JukeboxItem: NSObject {
-    
-    public struct Meta {
-        fileprivate(set) public var duration: Double?
-        fileprivate(set) public var title: String?
-        fileprivate(set) public var album: String?
-        fileprivate(set) public var artist: String?
-        fileprivate(set) public var artwork: UIImage?
-    }
     
     // MARK:- Properties -
     
@@ -94,7 +49,7 @@ open class JukeboxItem: NSObject {
     fileprivate(set) open lazy var meta = Meta()
     
     /// Builder to supply custom metadata for item.
-    public var customMetaBuilder: JukeboxItemMetaBuilder? {
+    public var customMetaBuilder: MetaBuilder? {
         didSet {
             self.configureMetadata()
         }
@@ -133,7 +88,7 @@ open class JukeboxItem: NSObject {
             if let item = playerItem , item === object as? AVPlayerItem {
                 guard let metadata = item.timedMetadata else { return }
                 for item in metadata {
-                    if self.customMetaBuilder?.hasMetadataItem(item) != true { // custom meta takes precedence
+                    if self.customMetaBuilder?.hasMetaItem(item) != true { // custom meta takes precedence
                         meta.process(metaItem: item)
                     }
                 }
@@ -250,7 +205,8 @@ open class JukeboxItem: NSObject {
 }
 
 private extension JukeboxItem.Meta {
-    mutating func process(metaItem item: AVMetadataItem) {
+    
+    func process(metaItem item: AVMetadataItem) {
         
         switch item.commonKey
         {
@@ -267,7 +223,7 @@ private extension JukeboxItem.Meta {
         }
     }
     
-    mutating func processBuilder(_ metaBuilder: JukeboxItemMetaBuilder) {
+    func processBuilder(_ metaBuilder: JukeboxItem.MetaBuilder) {
         if let builderTitle = metaBuilder.title {
             title = builderTitle
         }
@@ -282,7 +238,7 @@ private extension JukeboxItem.Meta {
         }
     }
     
-    mutating func processArtwork(fromMetadataItem item: AVMetadataItem) {
+    func processArtwork(fromMetadataItem item: AVMetadataItem) {
         guard let value = item.value else { return }
         let copiedValue: AnyObject = value.copy(with: nil) as AnyObject
         
@@ -294,6 +250,28 @@ private extension JukeboxItem.Meta {
         } else if let data = copiedValue as? Data{
             //AVMetadataKeySpaceiTunes
             artwork = UIImage(data: data)
+        }
+    }
+}
+
+fileprivate extension JukeboxItem.MetaBuilder {
+    
+    /// Whether the metadata builder has a specific AVMetadataItem value
+    ///
+    /// - Parameter metadataItem: The item to check for.
+    /// - Returns: Whether the metadata exists.
+    fileprivate func hasMetaItem(_ metadataItem: AVMetadataItem) -> Bool {
+        switch metadataItem.commonKey {
+        case "title"? :
+            return self.title != nil
+        case "albumName"? :
+            return self.album != nil
+        case "artist"? :
+            return self.artist != nil
+        case "artwork"? :
+            return self.artwork != nil
+        default :
+            return false
         }
     }
 }

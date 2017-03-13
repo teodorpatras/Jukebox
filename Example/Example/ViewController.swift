@@ -40,6 +40,11 @@ class ViewController: UIViewController, JukeboxDelegate {
             JukeboxItem(URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
             ])!
         
+        // Add custom metadata
+        jukebox.currentItem?.customMetaBuilder = JukeboxItem.MetaBuilder({ (meta) in
+            meta.artist = "Jukebox Artist"
+        })
+        
         /// Later add another item
         let delay = DispatchTime.now() + Double(Int64(3 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: delay) {

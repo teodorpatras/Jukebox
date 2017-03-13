@@ -14,6 +14,7 @@
 		137DF0CD1D2044DF00C15E86 /* JukeboxItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137DF0C91D2044DF00C15E86 /* JukeboxItemTests.swift */; };
 		137DF0CE1D2044DF00C15E86 /* JukeboxTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137DF0CA1D2044DF00C15E86 /* JukeboxTestCase.swift */; };
 		137DF0CF1D2044DF00C15E86 /* JukeboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137DF0CB1D2044DF00C15E86 /* JukeboxTests.swift */; };
+		D616D08E1E76B7D800C7AA32 /* JukeboxItemMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = D616D08D1E76B7D800C7AA32 /* JukeboxItemMeta.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,7 @@
 		137DF0C91D2044DF00C15E86 /* JukeboxItemTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxItemTests.swift; sourceTree = "<group>"; };
 		137DF0CA1D2044DF00C15E86 /* JukeboxTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxTestCase.swift; sourceTree = "<group>"; };
 		137DF0CB1D2044DF00C15E86 /* JukeboxTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxTests.swift; sourceTree = "<group>"; };
+		D616D08D1E76B7D800C7AA32 /* JukeboxItemMeta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JukeboxItemMeta.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				137DF0C01D2044CE00C15E86 /* Jukebox.h */,
 				137DF0C11D2044CE00C15E86 /* Jukebox.swift */,
 				137DF0C21D2044CE00C15E86 /* JukeboxItem.swift */,
+				D616D08D1E76B7D800C7AA32 /* JukeboxItemMeta.swift */,
 			);
 			path = Source;
 			sourceTree = SOURCE_ROOT;
@@ -224,6 +227,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D616D08E1E76B7D800C7AA32 /* JukeboxItemMeta.swift in Sources */,
 				137DF0C51D2044CE00C15E86 /* Jukebox.swift in Sources */,
 				137DF0C61D2044CE00C15E86 /* JukeboxItem.swift in Sources */,
 			);
