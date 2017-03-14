@@ -218,6 +218,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     }
     
     // MARK:- Properties -
+    public var autoplay = true
     
     fileprivate var player                       :   AVPlayer?
     fileprivate var progressObserver             :   AnyObject!
@@ -477,7 +478,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     }
     
     func playerItemDidPlayToEnd(_ notification : Notification){
-        if playIndex >= queuedItems.count - 1 {
+        if playIndex >= queuedItems.count - 1 || !autoplay {
             stop()
         } else {
             play(atIndex: playIndex + 1)
