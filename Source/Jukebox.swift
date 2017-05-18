@@ -140,6 +140,11 @@ extension Jukebox {
         item.update()
         if shouldPlay {
             player.play()
+            if #available(iOS 10.0, *) {
+                player.playImmediately(atRate: 1.0)
+            } else {
+                player.play()
+            }
             if state != .playing {
                 state = .playing
             }
@@ -354,7 +359,11 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         if state != .playing {
             startProgressTimer()
             if let player = player {
-                player.play()
+                if #available(iOS 10.0, *) {
+                    player.playImmediately(atRate: 1.0)
+                } else {
+                    player.play()
+                }
             } else {
                 currentItem!.refreshPlayerItem(withAsset: currentItem!.playerItem!.asset)
                 startNewPlayer(forItem: currentItem!.playerItem!)
@@ -473,7 +482,11 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     
     func handleStall() {
         player?.pause()
-        player?.play()
+        if #available(iOS 10.0, *) {
+            player?.playImmediately(atRate: 1.0)
+        } else {
+            player?.play()
+        }
     }
     
     func playerItemDidPlayToEnd(_ notification : Notification){
