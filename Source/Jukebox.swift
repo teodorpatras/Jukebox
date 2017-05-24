@@ -195,6 +195,10 @@ extension Jukebox {
 
 open class Jukebox: NSObject, JukeboxItemDelegate {
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     public enum State: Int, CustomStringConvertible {
         case ready = 0
         case playing
@@ -203,9 +207,8 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         case failed
         
         public var description: String {
-            get{
-                switch self
-                {
+            get {
+                switch self {
                 case .ready:
                     return "Ready"
                 case .playing:
@@ -216,38 +219,33 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
                     return "Paused"
                 case .loading:
                     return "Loading"
-                    
                 }
             }
         }
     }
     
-    // MARK:- Properties -
+    // MARK: Properties
+    fileprivate var player: AVPlayer?
+    fileprivate var progressObserver: AnyObject!
+    fileprivate var backgroundIdentifier = UIBackgroundTaskInvalid
+    fileprivate(set) open weak var delegate: JukeboxDelegate?
     
-    fileprivate var player                       :   AVPlayer?
-    fileprivate var progressObserver             :   AnyObject!
-    fileprivate var backgroundIdentifier         =   UIBackgroundTaskInvalid
-    fileprivate(set) open weak var delegate    :   JukeboxDelegate?
-    
-    fileprivate (set) open var playIndex       =   0
-    fileprivate (set) open var queuedItems     :   [JukeboxItem]!
-    fileprivate (set) open var state           =   State.ready {
+    fileprivate (set) open var playIndex = 0
+    fileprivate (set) open var queuedItems: [JukeboxItem]!
+    fileprivate (set) open var state: State = .ready {
         didSet {
             delegate?.jukeboxStateDidChange(self)
         }
     }
-    // MARK:  Computed
+    
+    // MARK: Computed
     open var bufferTime: TimeInterval {
         return availableDuration()
     }
     
     open var volume: Float{
-        get {
-            return player?.volume ?? 0
-        }
-        set {
-            player?.volume = newValue
-        }
+        get { return player?.volume ?? 0 }
+        set { player?.volume = newValue }
     }
     
     open var currentItem: JukeboxItem? {
@@ -286,12 +284,13 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         configureObservers()
     }
     
-    deinit{
-        NotificationCenter.default.removeObserver(self)
+    public func changeSpeedTo(value: Double) {
+        guard let player = player else { return }
+        
+        player.rate = Float(value)
     }
     
     // MARK:- JukeboxItemDelegate -
-    
     func jukeboxItemDidFail(_ item: JukeboxItem) {
         stop()
         state = .failed
@@ -395,7 +394,10 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         
         // Pre-Fetching increased
         if #available(iOS 10.0, *) {
-            item.preferredForwardBufferDuration = TimeInterval(CMTimeGetSeconds(item.duration))
+            let duration = TimeInterval(CMTimeGetSeconds(item.duration))
+            if duration > 0 {
+                item.preferredForwardBufferDuration = duration
+            }
         }
     }
     

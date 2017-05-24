@@ -40,6 +40,8 @@ class ViewController: UIViewController, JukeboxDelegate {
             JukeboxItem(URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
             ])!
         
+        
+        
         /// Later add another item
         let delay = DispatchTime.now() + Double(Int64(3 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: delay) {
@@ -51,8 +53,7 @@ class ViewController: UIViewController, JukeboxDelegate {
         return true
     }
     
-    func configureUI ()
-    {
+    func configureUI () {
         resetUI()
         
         let color = UIColor(red:0.84, green:0.09, blue:0.1, alpha:1)
@@ -167,9 +168,12 @@ class ViewController: UIViewController, JukeboxDelegate {
             jukebox.playPrevious()
         }
     }
+    var current = 1.0
     
     @IBAction func nextAction() {
-        jukebox.playNext()
+        jukebox.changeSpeedTo(value: current + 0.5)
+        current += 0.5
+//        jukebox.playNext()
     }
     
     @IBAction func playPauseAction() {
