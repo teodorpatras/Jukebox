@@ -387,7 +387,8 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     fileprivate func startNewPlayer(forItem item : AVPlayerItem) {
         invalidatePlayback(shouldResetIndex: false)
         player = AVPlayer(playerItem: item)
-        player?.allowsExternalPlayback = false
+        player?.allowsExternalPlayback = true
+        
         startProgressTimer()
         seek(toSecond: 0, shouldPlay: true)
         updateInfoCenter()
