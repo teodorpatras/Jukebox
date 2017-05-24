@@ -160,12 +160,12 @@ extension Jukebox {
             item.loadPlayerItem()
         }
     }
-
-    /**
-    Removes an item from the play queue
     
-    - parameter item: item to be removed
-    */
+    /**
+     Removes an item from the play queue
+     
+     - parameter item: item to be removed
+     */
     public func remove(item: JukeboxItem) {
         if let index = queuedItems.index(where: {$0.identifier == item.identifier}) {
             queuedItems.remove(at: index)
@@ -232,6 +232,9 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         }
     }
     // MARK:  Computed
+    open var bufferTime: TimeInterval {
+        return availableDuration()
+    }
     
     open var volume: Float{
         get {
@@ -256,13 +259,13 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     // MARK:- Initializer -
     
     /**
-    Create an instance with a delegate and a list of items without loading their assets.
-    
-    - parameter delegate: jukebox delegate
-    - parameter items:    array of items to be added to the play queue
-    
-    - returns: Jukebox instance
-    */
+     Create an instance with a delegate and a list of items without loading their assets.
+     
+     - parameter delegate: jukebox delegate
+     - parameter items:    array of items to be added to the play queue
+     
+     - returns: Jukebox instance
+     */
     public required init?(delegate: JukeboxDelegate? = nil, items: [JukeboxItem] = [JukeboxItem]())  {
         self.delegate = delegate
         super.init()
@@ -380,6 +383,11 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         startProgressTimer()
         seek(toSecond: 0, shouldPlay: true)
         updateInfoCenter()
+        
+        // Pre-Fetching increased
+        if #available(iOS 10.0, *) {
+            item.preferredForwardBufferDuration = TimeInterval(CMTimeGetSeconds(item.duration))
+        }
     }
     
     // MARK: Items related
@@ -415,9 +423,20 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     }
     
     // MARK: Progress tracking
+    fileprivate func availableDuration() -> TimeInterval {
+        if let range = self.player?.currentItem?.loadedTimeRanges.first {
+            let timeRage = range.timeRangeValue
+            let startTime = CMTimeGetSeconds(timeRage.start)
+            let loadedDuration = CMTimeGetSeconds(timeRage.duration)
+            
+            return TimeInterval(startTime + loadedDuration)
+        }
+        
+        return 0.0
+    }
     
-    fileprivate func startProgressTimer(){
-        guard let player = player , player.currentItem?.duration.isValid == true else {return}
+    fileprivate func startProgressTimer() {
+        guard let player = player, player.currentItem?.duration.isValid == true else {return}
         progressObserver = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.05, Int32(NSEC_PER_SEC)), queue: nil, using: { [unowned self] (time : CMTime) -> Void in
             self.timerAction()
         }) as AnyObject!
@@ -434,7 +453,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     // MARK: Configurations
     
     fileprivate func configureBackgroundAudioTask() {
-        backgroundIdentifier =  UIApplication.shared.beginBackgroundTask (expirationHandler: { () -> Void in
+        backgroundIdentifier = UIApplication.shared.beginBackgroundTask (expirationHandler: { () -> Void in
             UIApplication.shared.endBackgroundTask(self.backgroundIdentifier)
             self.backgroundIdentifier = UIBackgroundTaskInvalid
         })
@@ -457,7 +476,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         guard let userInfo = notification.userInfo as? [String: AnyObject] else { return }
         guard let rawInterruptionType = userInfo[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
         guard let interruptionType = AVAudioSessionInterruptionType(rawValue: rawInterruptionType.uintValue) else { return }
-
+        
         switch interruptionType {
         case .began: //interruption started
             self.pause()
