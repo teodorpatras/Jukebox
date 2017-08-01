@@ -74,7 +74,13 @@ open class JukeboxItem: NSObject {
         super.init()
         configureMetadata()
     }
-    
+    public required init(URL : Foundation.URL, localTitle : String? = nil,songName: String?) {
+        self.URL = URL
+        self.identifier = UUID().uuidString
+        self.localTitle = songName
+        super.init()
+        configureMetadata()
+    }
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 
         if change?[NSKeyValueChangeKey(rawValue:"name")] is NSNull {
