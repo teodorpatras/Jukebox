@@ -35,15 +35,15 @@ class ViewController: UIViewController, JukeboxDelegate {
         
         // configure jukebox
         jukebox = Jukebox(delegate: self, items: [
-            JukeboxItem(URL: URL(string: "http://www.kissfm.ro/listen.pls")!),
-            JukeboxItem(URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!),
-            JukeboxItem(URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!)
+            JukeboxItem(URL: URL(string: "http://www.kissfm.ro/listen.pls")!, songName: "pls title"),
+            JukeboxItem(URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2514.mp3")!, songName: "sample 1 title"),
+            JukeboxItem(URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2958.mp3")!, songName: "sample 2 title")
             ])!
         
         /// Later add another item
         let delay = DispatchTime.now() + Double(Int64(3 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: delay) {
-            self.jukebox.append(item: JukeboxItem (URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!), loadingAssets: true)
+            self.jukebox.append(item: JukeboxItem (URL: URL(string: "http://www.noiseaddicts.com/samples_1w72b820/2228.mp3")!, songName: "sample 3 title"), loadingAssets: true)
         }
     }
     
