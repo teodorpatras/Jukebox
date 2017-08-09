@@ -366,9 +366,9 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
                 } else {
                     player.play()
                 }
-            } else {
-                currentItem!.refreshPlayerItem(withAsset: currentItem!.playerItem!.asset)
-                startNewPlayer(forItem: currentItem!.playerItem!)
+            } else if let currentItem = currentItem, let playerItem = currentItem.playerItem {
+                currentItem.refreshPlayerItem(withAsset: playerItem.asset)
+                startNewPlayer(forItem: playerItem)
             }
             state = .playing
         }
