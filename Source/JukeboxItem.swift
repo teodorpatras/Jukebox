@@ -161,7 +161,7 @@ open class JukeboxItem: NSObject {
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
     }
     
-    func notifyDelegate() {
+    @objc func notifyDelegate() {
         timer?.invalidate()
         timer = nil
         self.delegate?.jukeboxItemDidUpdate(self)
@@ -177,20 +177,17 @@ open class JukeboxItem: NSObject {
         })
     }
     
-    fileprivate func configureMetadata()
-    {
-        
+    fileprivate func configureMetadata() {
         DispatchQueue.global(qos: .background).async {
             let metadataArray = AVPlayerItem(url: self.URL).asset.commonMetadata
             
-            for item in metadataArray
-            {
-                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
+            for item in metadataArray {
+                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpace.common.rawValue]) {
                     self.meta.process(metaItem: item)
                     DispatchQueue.main.async {
                         self.scheduleNotification()
                     }
-                })
+                }
             }
         }
     }
@@ -198,19 +195,14 @@ open class JukeboxItem: NSObject {
 
 private extension JukeboxItem.Meta {
     mutating func process(metaItem item: AVMetadataItem) {
+        guard let commonKey = item.commonKey else { return }
         
-        switch item.commonKey
-        {
-        case "title"? :
-            title = item.value as? String
-        case "albumName"? :
-            album = item.value as? String
-        case "artist"? :
-            artist = item.value as? String
-        case "artwork"? :
-            processArtwork(fromMetadataItem : item)
-        default :
-            break
+        switch commonKey.rawValue {
+        case "title": title = item.value as? String
+        case "albumName": album = item.value as? String
+        case "artist": artist = item.value as? String
+        case "artwork": processArtwork(fromMetadataItem : item)
+        default : break
         }
     }
     

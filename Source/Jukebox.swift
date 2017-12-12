@@ -305,9 +305,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     func jukeboxItemDidLoadPlayerItem(_ item: JukeboxItem) {
         delegate?.jukeboxDidLoadItem(self, item: item)
         let index = queuedItems.index{$0 === item}
-        
-        guard let playItem = item.playerItem
-            , state == .loading && playIndex == index else {return}
+        guard let playItem = item.playerItem, state == .loading && playIndex == index else {return}
         
         registerForPlayToEndNotification(withItem: playItem)
         startNewPlayer(forItem: playItem)
@@ -377,17 +375,19 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     fileprivate func invalidatePlayback(shouldResetIndex resetIndex: Bool = true) {
         stopProgressTimer()
         player?.pause()
-        player = nil
+        
+//        player = nil
         
         if resetIndex {
             playIndex = 0
         }
     }
     
-    fileprivate func startNewPlayer(forItem item : AVPlayerItem) {
+    fileprivate func startNewPlayer(forItem item: AVPlayerItem) {
         invalidatePlayback(shouldResetIndex: false)
         player = AVPlayer(playerItem: item)
         player?.allowsExternalPlayback = true
+        
         
         startProgressTimer()
         seek(toSecond: 0, shouldPlay: true)
@@ -484,7 +484,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     
     // MARK:- Notifications -
     
-    func handleAudioSessionInterruption(_ notification : Notification) {
+    @objc func handleAudioSessionInterruption(_ notification : Notification) {
         guard let userInfo = notification.userInfo as? [String: AnyObject] else { return }
         guard let rawInterruptionType = userInfo[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
         guard let interruptionType = AVAudioSessionInterruptionType(rawValue: rawInterruptionType.uintValue) else { return }
@@ -502,7 +502,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         }
     }
     
-    func handleStall() {
+    @objc func handleStall() {
         guard let player = player else { return }
         
         player.pause()
@@ -514,7 +514,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         }
     }
     
-    func playerItemDidPlayToEnd(_ notification : Notification){
+    @objc func playerItemDidPlayToEnd(_ notification : Notification){
         if playIndex >= queuedItems.count - 1 {
             stop()
         } else {
