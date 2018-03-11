@@ -198,16 +198,18 @@ open class JukeboxItem: NSObject {
 
 private extension JukeboxItem.Meta {
     mutating func process(metaItem item: AVMetadataItem) {
-        
-        switch item.commonKey
+
+        guard let commonKey = item.commonKey else { return }
+
+        switch commonKey
         {
-        case "title"? :
+        case .commonKeyTitle :
             title = item.value as? String
-        case "albumName"? :
+        case .commonKeyAlbumName :
             album = item.value as? String
-        case "artist"? :
+        case .commonKeyArtist :
             artist = item.value as? String
-        case "artwork"? :
+        case .commonKeyArtwork :
             processArtwork(fromMetadataItem : item)
         default :
             break
