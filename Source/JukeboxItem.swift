@@ -161,7 +161,7 @@ open class JukeboxItem: NSObject {
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
     }
     
-    func notifyDelegate() {
+    @objc func notifyDelegate() {
         timer?.invalidate()
         timer = nil
         self.delegate?.jukeboxItemDidUpdate(self)
