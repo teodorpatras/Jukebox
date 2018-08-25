@@ -1,6 +1,6 @@
 ![Jukebox: audio player in Swift](https://raw.githubusercontent.com/teodorpatras/Jukebox/master/assets/jukebox.png)
 
-![Swift3](https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat")
+![Swift4](https://img.shields.io/badge/Swift-4.0-orange.svg?style=flat")
 [![Platform](https://img.shields.io/cocoapods/p/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
 [![Build Status](https://travis-ci.org/teodorpatras/Jukebox.svg)](https://travis-ci.org/teodorpatras/Jukebox)
 [![Version](https://img.shields.io/cocoapods/v/Jukebox.svg?style=flat)](http://cocoapods.org/pods/Jukebox)
