@@ -420,7 +420,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         guard let player = player , player.currentItem?.duration.isValid == true else {return}
         progressObserver = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.05, Int32(NSEC_PER_SEC)), queue: nil, using: { [unowned self] (time : CMTime) -> Void in
             self.timerAction()
-        }) as AnyObject!
+        }) as AnyObject?
     }
     
     fileprivate func stopProgressTimer() {
