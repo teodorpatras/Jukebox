@@ -377,6 +377,11 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         invalidatePlayback(shouldResetIndex: false)
         player = AVPlayer(playerItem: item)
         player?.allowsExternalPlayback = false
+        
+        if #available(iOS 10.0, *) {
+            player?.automaticallyWaitsToMinimizeStalling = false
+        }
+        
         startProgressTimer()
         seek(toSecond: 0, shouldPlay: true)
         updateInfoCenter()
