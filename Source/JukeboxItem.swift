@@ -46,8 +46,8 @@ open class JukeboxItem: NSObject {
     let identifier: String
     var delegate: JukeboxItemDelegate?
     
-    open  var localTitle: String?
-    open  let URL: Foundation.URL
+    public var localTitle: String?
+    public let URL: Foundation.URL
     
     fileprivate(set) open var playerItem: AVPlayerItem?
     fileprivate (set) open var currentTime: Double?
