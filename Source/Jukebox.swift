@@ -90,7 +90,7 @@ extension Jukebox {
         invalidatePlayback()
         state = .ready
         UIApplication.shared.endBackgroundTask(backgroundIdentifier)
-        backgroundIdentifier = UIBackgroundTaskInvalid
+        backgroundIdentifier = UIBackgroundTaskIdentifier.invalid
     }
     
     /**
@@ -136,7 +136,7 @@ extension Jukebox {
     public func seek(toSecond second: Int, shouldPlay: Bool = false) {
         guard let player = player, let item = currentItem else {return}
         
-        player.seek(to: CMTimeMake(Int64(second), 1))
+        player.seek(to: CMTimeMake(value: Int64(second), timescale: 1))
         item.update()
         if shouldPlay {
             player.play()
@@ -221,7 +221,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     
     fileprivate var player                       :   AVPlayer?
     fileprivate var progressObserver             :   AnyObject!
-    fileprivate var backgroundIdentifier         =   UIBackgroundTaskInvalid
+    fileprivate var backgroundIdentifier         =   UIBackgroundTaskIdentifier.invalid
     fileprivate(set) open weak var delegate    :   JukeboxDelegate?
     
     fileprivate (set) open var playIndex       =   0
@@ -418,9 +418,9 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     
     fileprivate func startProgressTimer(){
         guard let player = player , player.currentItem?.duration.isValid == true else {return}
-        progressObserver = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.05, Int32(NSEC_PER_SEC)), queue: nil, using: { [unowned self] (time : CMTime) -> Void in
+        progressObserver = player.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.05, preferredTimescale: Int32(NSEC_PER_SEC)), queue: nil, using: { [unowned self] (time : CMTime) -> Void in
             self.timerAction()
-        }) as AnyObject!
+        }) as AnyObject
     }
     
     fileprivate func stopProgressTimer() {
@@ -436,47 +436,50 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
     fileprivate func configureBackgroundAudioTask() {
         backgroundIdentifier =  UIApplication.shared.beginBackgroundTask (expirationHandler: { () -> Void in
             UIApplication.shared.endBackgroundTask(self.backgroundIdentifier)
-            self.backgroundIdentifier = UIBackgroundTaskInvalid
+            self.backgroundIdentifier = UIBackgroundTaskIdentifier.invalid
         })
     }
     
     fileprivate func configureAudioSession() throws {
-        try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-        try AVAudioSession.sharedInstance().setMode(AVAudioSessionModeDefault)
+        if #available(iOS 10.0, *) {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: AVAudioSession.Mode.default)
+        } else {
+            try AVAudioSession.sharedInstance().setMode(AVAudioSession.Mode.default)
+        }
         try AVAudioSession.sharedInstance().setActive(true)
     }
     
     fileprivate func configureObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(Jukebox.handleStall), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionInterruption), name: NSNotification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionInterruption), name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
     }
     
     // MARK:- Notifications -
     
-    func handleAudioSessionInterruption(_ notification : Notification) {
+    @objc func handleAudioSessionInterruption(_ notification : Notification) {
         guard let userInfo = notification.userInfo as? [String: AnyObject] else { return }
         guard let rawInterruptionType = userInfo[AVAudioSessionInterruptionTypeKey] as? NSNumber else { return }
-        guard let interruptionType = AVAudioSessionInterruptionType(rawValue: rawInterruptionType.uintValue) else { return }
+        guard let interruptionType = AVAudioSession.InterruptionType(rawValue: rawInterruptionType.uintValue) else { return }
 
         switch interruptionType {
         case .began: //interruption started
             self.pause()
         case .ended: //interruption ended
             if let rawInterruptionOption = userInfo[AVAudioSessionInterruptionOptionKey] as? NSNumber {
-                let interruptionOption = AVAudioSessionInterruptionOptions(rawValue: rawInterruptionOption.uintValue)
-                if interruptionOption == AVAudioSessionInterruptionOptions.shouldResume {
+                let interruptionOption = AVAudioSession.InterruptionOptions(rawValue: rawInterruptionOption.uintValue)
+                if interruptionOption == AVAudioSession.InterruptionOptions.shouldResume {
                     self.resumePlayback()
                 }
             }
         }
     }
     
-    func handleStall() {
+    @objc func handleStall() {
         player?.pause()
         player?.play()
     }
     
-    func playerItemDidPlayToEnd(_ notification : Notification){
+    @objc func playerItemDidPlayToEnd(_ notification : Notification){
         if playIndex >= queuedItems.count - 1 {
             stop()
         } else {

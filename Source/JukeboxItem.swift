@@ -43,11 +43,11 @@ open class JukeboxItem: NSObject {
     
     // MARK:- Properties -
     
-            let identifier: String
-            var delegate: JukeboxItemDelegate?
+    let identifier: String
+    var delegate: JukeboxItemDelegate?
     fileprivate var didLoad = false
-    open  var localTitle: String?
-    open  let URL: Foundation.URL
+    public var localTitle: String?
+    public let URL: Foundation.URL
     
     fileprivate(set) open var playerItem: AVPlayerItem?
     fileprivate (set) open var currentTime: Double?
@@ -136,7 +136,7 @@ open class JukeboxItem: NSObject {
     }
     
     open override var description: String {
-        return "<JukeboxItem:\ntitle: \(meta.title)\nalbum: \(meta.album)\nartist:\(meta.artist)\nduration : \(meta.duration),\ncurrentTime : \(currentTime)\nURL: \(URL)>"
+        return "<JukeboxItem:\ntitle: \(String(describing: meta.title))\nalbum: \(String(describing: meta.album))\nartist:\(String(describing: meta.artist))\nduration : \(String(describing: meta.duration)),\ncurrentTime : \(String(describing: currentTime))\nURL: \(URL)>"
     }
     
     // MARK:- Private methods -
@@ -161,7 +161,7 @@ open class JukeboxItem: NSObject {
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
     }
     
-    func notifyDelegate() {
+    @objc func notifyDelegate() {
         timer?.invalidate()
         timer = nil
         self.delegate?.jukeboxItemDidUpdate(self)
@@ -185,7 +185,7 @@ open class JukeboxItem: NSObject {
             
             for item in metadataArray
             {
-                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
+                item.loadValuesAsynchronously(forKeys: [convertFromAVMetadataKeySpace(AVMetadataKeySpace.common)], completionHandler: { () -> Void in
                     self.meta.process(metaItem: item)
                     DispatchQueue.main.async {
                         self.scheduleNotification()
@@ -199,7 +199,7 @@ open class JukeboxItem: NSObject {
 private extension JukeboxItem.Meta {
     mutating func process(metaItem item: AVMetadataItem) {
         
-        switch item.commonKey
+        switch convertFromOptionalAVMetadataKey(item.commonKey)
         {
         case "title"? :
             title = item.value as? String
@@ -236,4 +236,15 @@ private extension CMTime {
         guard time.isNaN == false else { return nil }
         return time
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromAVMetadataKeySpace(_ input: AVMetadataKeySpace) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromOptionalAVMetadataKey(_ input: AVMetadataKey?) -> String? {
+	guard let input = input else { return nil }
+	return input.rawValue
 }
