@@ -43,30 +43,30 @@ open class JukeboxItem: NSObject {
     
     // MARK:- Properties -
     
-            let identifier: String
-            var delegate: JukeboxItemDelegate?
-    fileprivate var didLoad = false
-    open  var localTitle: String?
-    open  let URL: Foundation.URL
+    let identifier: String
+    var delegate: JukeboxItemDelegate?
+    
+    public var localTitle: String?
+    public let URL: Foundation.URL
     
     fileprivate(set) open var playerItem: AVPlayerItem?
     fileprivate (set) open var currentTime: Double?
     fileprivate(set) open lazy var meta = Meta()
-
     
+    fileprivate var didLoad = false
     fileprivate var timer: Timer?
     fileprivate let observedValue = "timedMetadata"
     
     // MARK:- Initializer -
     
     /**
-    Create an instance with an URL and local title
-    
-    - parameter URL: local or remote URL of the audio file
-    - parameter localTitle: an optional title for the file
-    
-    - returns: JukeboxItem instance
-    */
+     Create an instance with an URL and local title
+     
+     - parameter URL: local or remote URL of the audio file
+     - parameter localTitle: an optional title for the file
+     
+     - returns: JukeboxItem instance
+     */
     public required init(URL : Foundation.URL, localTitle : String? = nil) {
         self.URL = URL
         self.identifier = UUID().uuidString
@@ -76,7 +76,7 @@ open class JukeboxItem: NSObject {
     }
     
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-
+        
         if change?[NSKeyValueChangeKey(rawValue:"name")] is NSNull {
             delegate?.jukeboxItemDidFail(self)
             return
@@ -136,7 +136,7 @@ open class JukeboxItem: NSObject {
     }
     
     open override var description: String {
-        return "<JukeboxItem:\ntitle: \(meta.title)\nalbum: \(meta.album)\nartist:\(meta.artist)\nduration : \(meta.duration),\ncurrentTime : \(currentTime)\nURL: \(URL)>"
+        return "<JukeboxItem:\ntitle: \(String(describing: meta.title))\nalbum: \(String(describing: meta.album))\nartist:\(String(describing: meta.artist))\nduration : \(String(describing: meta.duration)),\ncurrentTime : \(String(describing: currentTime))\nURL: \(URL)>"
     }
     
     // MARK:- Private methods -
@@ -161,7 +161,7 @@ open class JukeboxItem: NSObject {
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
     }
     
-    func notifyDelegate() {
+    @objc func notifyDelegate() {
         timer?.invalidate()
         timer = nil
         self.delegate?.jukeboxItemDidUpdate(self)
@@ -177,20 +177,17 @@ open class JukeboxItem: NSObject {
         })
     }
     
-    fileprivate func configureMetadata()
-    {
-        
-       DispatchQueue.global(qos: .background).async {
+    fileprivate func configureMetadata() {
+        DispatchQueue.global(qos: .background).async {
             let metadataArray = AVPlayerItem(url: self.URL).asset.commonMetadata
             
-            for item in metadataArray
-            {
-                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
+            for item in metadataArray {
+                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpace.common.rawValue]) {
                     self.meta.process(metaItem: item)
                     DispatchQueue.main.async {
                         self.scheduleNotification()
                     }
-                })
+                }
             }
         }
     }
@@ -198,19 +195,14 @@ open class JukeboxItem: NSObject {
 
 private extension JukeboxItem.Meta {
     mutating func process(metaItem item: AVMetadataItem) {
+        guard let commonKey = item.commonKey else { return }
         
-        switch item.commonKey
-        {
-        case "title"? :
-            title = item.value as? String
-        case "albumName"? :
-            album = item.value as? String
-        case "artist"? :
-            artist = item.value as? String
-        case "artwork"? :
-            processArtwork(fromMetadataItem : item)
-        default :
-            break
+        switch commonKey.rawValue {
+        case "title": title = item.value as? String
+        case "albumName": album = item.value as? String
+        case "artist": artist = item.value as? String
+        case "artwork": processArtwork(fromMetadataItem : item)
+        default : break
         }
     }
     
