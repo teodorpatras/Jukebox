@@ -356,8 +356,9 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
             if let player = player {
                 player.play()
             } else {
-                currentItem!.refreshPlayerItem(withAsset: currentItem!.playerItem!.asset)
-                startNewPlayer(forItem: currentItem!.playerItem!)
+                guard let currentItem = currentItem else { return }
+                currentItem.refreshPlayerItem(withAsset: currentItem.playerItem!.asset)
+                startNewPlayer(forItem: currentItem.playerItem!)
             }
             state = .playing
         }
@@ -377,6 +378,11 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         invalidatePlayback(shouldResetIndex: false)
         player = AVPlayer(playerItem: item)
         player?.allowsExternalPlayback = false
+        
+        if #available(iOS 10.0, *) {
+            player?.automaticallyWaitsToMinimizeStalling = false
+        }
+        
         startProgressTimer()
         seek(toSecond: 0, shouldPlay: true)
         updateInfoCenter()
