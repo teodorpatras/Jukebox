@@ -136,15 +136,17 @@ extension Jukebox {
     public func seek(toSecond second: Int, shouldPlay: Bool = false) {
         guard let player = player, let item = currentItem else {return}
         
-        player.seek(to: CMTimeMake(Int64(second), 1))
-        item.update()
-        if shouldPlay {
-            player.play()
-            if state != .playing {
-                state = .playing
+        player.seek(to: CMTimeMake(value: Int64(second), timescale: 1), completionHandler: { [weak self] finished in
+            guard finished, let `self` = self else { return }
+            item.update()
+            if shouldPlay {
+                player.play()
+                if self.state != .playing {
+                    self.state = .playing
+                }
             }
-        }
-        delegate?.jukeboxPlaybackProgressDidChange(self)
+            self.delegate?.jukeboxPlaybackProgressDidChange(self)
+        })
     }
     
     /**
