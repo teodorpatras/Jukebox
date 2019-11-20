@@ -141,8 +141,8 @@ extension Jukebox {
             item.update()
             if shouldPlay {
                 player.play()
-                if state != .playing {
-                    state = .playing
+                if self.state != .playing {
+                    self.state = .playing
                 }
             }
             self.delegate?.jukeboxPlaybackProgressDidChange(self)
