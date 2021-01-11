@@ -161,7 +161,7 @@ open class JukeboxItem: NSObject {
         timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(JukeboxItem.notifyDelegate), userInfo: nil, repeats: false)
     }
     
-    func notifyDelegate() {
+    @objc func notifyDelegate() {
         timer?.invalidate()
         timer = nil
         self.delegate?.jukeboxItemDidUpdate(self)
@@ -185,7 +185,7 @@ open class JukeboxItem: NSObject {
             
             for item in metadataArray
             {
-                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpaceCommon], completionHandler: { () -> Void in
+                item.loadValuesAsynchronously(forKeys: [AVMetadataKeySpace.common.rawValue], completionHandler: { () -> Void in
                     self.meta.process(metaItem: item)
                     DispatchQueue.main.async {
                         self.scheduleNotification()
@@ -198,16 +198,16 @@ open class JukeboxItem: NSObject {
 
 private extension JukeboxItem.Meta {
     mutating func process(metaItem item: AVMetadataItem) {
-        
-        switch item.commonKey
+        guard let commonKey = item.commonKey else { return }
+        switch commonKey
         {
-        case "title"? :
+        case .commonKeyTitle :
             title = item.value as? String
-        case "albumName"? :
+        case .commonKeyAlbumName :
             album = item.value as? String
-        case "artist"? :
+        case .commonKeyArtist :
             artist = item.value as? String
-        case "artwork"? :
+        case .commonKeyArtwork :
             processArtwork(fromMetadataItem : item)
         default :
             break
