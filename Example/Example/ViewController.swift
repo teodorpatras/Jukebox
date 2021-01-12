@@ -58,7 +58,7 @@ class ViewController: UIViewController, JukeboxDelegate {
         let color = UIColor(red:0.84, green:0.09, blue:0.1, alpha:1)
         
         indicator.color = color
-        slider.setThumbImage(UIImage(named: "sliderThumb"), for: UIControlState())
+        slider.setThumbImage(UIImage(named: "sliderThumb"), for: UIControl.State())
         slider.minimumTrackTintColor = color
         slider.maximumTrackTintColor = UIColor.black
         
@@ -99,9 +99,9 @@ class ViewController: UIViewController, JukeboxDelegate {
         })
         
         if jukebox.state == .ready {
-            playPauseButton.setImage(UIImage(named: "playBtn"), for: UIControlState())
+            playPauseButton.setImage(UIImage(named: "playBtn"), for: UIControl.State())
         } else if jukebox.state == .loading  {
-            playPauseButton.setImage(UIImage(named: "pauseBtn"), for: UIControlState())
+            playPauseButton.setImage(UIImage(named: "pauseBtn"), for: UIControl.State())
         } else {
             volumeSlider.value = jukebox.volume
             let imageName: String
@@ -111,7 +111,7 @@ class ViewController: UIViewController, JukeboxDelegate {
             case .paused, .failed, .ready:
                 imageName = "playBtn"
             }
-            playPauseButton.setImage(UIImage(named: imageName), for: UIControlState())
+            playPauseButton.setImage(UIImage(named: imageName), for: UIControl.State())
         }
         
         print("Jukebox state changed to \(jukebox.state)")
