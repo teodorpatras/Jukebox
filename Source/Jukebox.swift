@@ -450,7 +450,7 @@ open class Jukebox: NSObject, JukeboxItemDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(Jukebox.handleStall), name: NSNotification.Name.AVPlayerItemPlaybackStalled, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionInterruption(_:)), name: NSNotification.Name.AVCaptureSessionWasInterrupted, object: AVAudioSession.sharedInstance())
         
-        
+        ///This is need to be check I am not sure whether it will work fine or not
 //        
 //        NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionInterruption), name: NSNotification.Name.AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
     }
