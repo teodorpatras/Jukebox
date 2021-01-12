@@ -47,7 +47,7 @@ open class JukeboxItem: NSObject {
             var delegate: JukeboxItemDelegate?
     fileprivate var didLoad = false
     open  var localTitle: String?
-    open  let URL: Foundation.URL
+    public  let URL: Foundation.URL
     
     fileprivate(set) open var playerItem: AVPlayerItem?
     fileprivate (set) open var currentTime: Double?
