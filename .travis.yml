@@ -12,7 +12,7 @@ env:
     - SCHEME=Jukebox
     - SDK=iphonesimulator10
 install:
-- gem install xcpretty-travis-formatter --no-rdoc --no-ri --no-document --quiet
+- gem install xcpretty --no-rdoc --no-ri --no-document --quiet
 before_deploy:
   - carthage build --no-skip-current
   - carthage archive $FRAMEWORK_NAME
