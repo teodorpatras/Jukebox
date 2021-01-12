@@ -12,7 +12,7 @@ env:
     - SCHEME=Jukebox
     - SDK=iphonesimulator10
 install:
-- gem install xcpretty --no-ri --no-document --quiet
+- gem install xcpretty 
 before_deploy:
   - carthage build --no-skip-current
   - carthage archive $FRAMEWORK_NAME
